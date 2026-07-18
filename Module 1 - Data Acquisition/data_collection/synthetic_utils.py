@@ -2,14 +2,29 @@ from __future__ import annotations
 
 import csv
 import math
+import random
 from datetime import datetime, timedelta
 from pathlib import Path
 
+# ==========================================================
+# Project Paths
+# ==========================================================
 
-# Folder where generated CSVs will be stored
-OUTPUT_DIR = Path("outputs")
-OUTPUT_DIR.mkdir(exist_ok=True)
+# data_collection/
+CURRENT_DIR = Path(__file__).resolve().parent
 
+# Module 1 - Data Acquisition/
+PROJECT_DIR = CURRENT_DIR.parent
+
+# Output folders
+OUTPUT_DIR = PROJECT_DIR / "outputs"
+CLEANED_DIR = OUTPUT_DIR / "cleaned_data"
+LOG_DIR = OUTPUT_DIR / "logs"
+
+# Create folders automatically
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+CLEANED_DIR.mkdir(parents=True, exist_ok=True)
+LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 def timestamp_series(start: datetime, periods: int, minutes: int = 15):
     """
@@ -73,3 +88,39 @@ def write_csv(filename: str, rows):
         writer.writerows(rows)
 
     return filepath
+
+def bounded(value: float, low: float, high: float) -> float:
+    """
+    Restrict a value between lower and upper limits.
+    """
+    return max(low, min(value, high))
+
+
+def random_walk(
+    start: float,
+    periods: int,
+    step: float = 1.0,
+    low: float | None = None,
+    high: float | None = None,
+):
+    """
+    Generate a bounded random walk.
+
+    Example:
+    start = 8.2
+    periods = 96
+    """
+    values = [round(start, 2)]
+
+    for _ in range(periods - 1):
+        next_value = values[-1] + random.uniform(-step, step)
+
+        if low is not None:
+            next_value = max(low, next_value)
+
+        if high is not None:
+            next_value = min(high, next_value)
+
+        values.append(round(next_value, 2))
+
+    return values
