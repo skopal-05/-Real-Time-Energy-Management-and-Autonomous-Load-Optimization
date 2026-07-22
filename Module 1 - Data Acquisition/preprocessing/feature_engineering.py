@@ -21,7 +21,8 @@ LOG_FILE = LOG_DIR / "feature_engineering_report.log"
 # ==========================================================
 
 DATASETS = [
-    "air_compressor.csv",
+    "compressor.csv",
+    "hvac.csv",
     "battery_storage.csv",
     "boiler.csv",
     "grid.csv",

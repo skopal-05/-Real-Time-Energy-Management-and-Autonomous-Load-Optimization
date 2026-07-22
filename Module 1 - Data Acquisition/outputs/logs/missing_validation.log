@@ -3,11 +3,11 @@ MISSING VALUES VALIDATION REPORT
 ======================================================================
 
 ----------------------------------------------------------------------
-Dataset : air_compressor.csv
+Dataset : compressor.csv
 ----------------------------------------------------------------------
 Rows             : 96
-Columns          : 8
-Total Cells      : 768
+Columns          : 9
+Total Cells      : 864
 Missing Values   : 0
 Duplicate Rows   : 0
 
@@ -16,10 +16,34 @@ Missing Values by Column
 timestamp                               0 (0.00%)
 system_id                               0 (0.00%)
 air_flow_m3_min                         0 (0.00%)
-discharge_pressure_bar                  0 (0.00%)
-power_consumption_kw                    0 (0.00%)
+air_pressure_bar                        0 (0.00%)
+power_kw                                0 (0.00%)
 motor_temperature_c                     0 (0.00%)
 vibration_mm_s                          0 (0.00%)
+efficiency_percent                      0 (0.00%)
+status                                  0 (0.00%)
+
+STATUS : PASSED
+
+----------------------------------------------------------------------
+Dataset : hvac.csv
+----------------------------------------------------------------------
+Rows             : 96
+Columns          : 9
+Total Cells      : 864
+Missing Values   : 0
+Duplicate Rows   : 0
+
+Missing Values by Column
+-----------------------------------
+timestamp                               0 (0.00%)
+system_id                               0 (0.00%)
+power_kw                                0 (0.00%)
+temperature_c                           0 (0.00%)
+airflow_m3_min                          0 (0.00%)
+humidity_percent                        0 (0.00%)
+setpoint_temperature_c                  0 (0.00%)
+efficiency_percent                      0 (0.00%)
 status                                  0 (0.00%)
 
 STATUS : PASSED
@@ -177,6 +201,6 @@ STATUS : PASSED
 ======================================================================
 SUMMARY
 ======================================================================
-Total Datasets : 8
-Passed         : 8
+Total Datasets : 9
+Passed         : 9
 Attention      : 0

@@ -22,7 +22,8 @@ LOG_FILE = LOG_DIR / "cleaning_report.log"
 # ==========================================================
 
 DATASETS = [
-    "air_compressor.csv",
+    "compressor.csv",
+    "hvac.csv",
     "battery_storage.csv",
     "boiler.csv",
     "grid.csv",

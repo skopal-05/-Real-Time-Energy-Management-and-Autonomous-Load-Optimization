@@ -13,7 +13,7 @@ from synthetic_utils import (
 )
 
 
-def generate_compressor(system_id: str = "air_compressor", periods: int = 96) -> str:
+def generate_compressor(system_id: str = "compressor", periods: int = 96) -> str:
     start = datetime(2026, 7, 1, 0, 0)
     timestamps = timestamp_series(start, periods=periods, minutes=15)
 
@@ -25,20 +25,23 @@ def generate_compressor(system_id: str = "air_compressor", periods: int = 96) ->
 
         return {
             "air_flow_m3_min": air_flow,
-            "discharge_pressure_bar": round(
+            "air_pressure_bar": round(
                 random.uniform(6.5, 9.5) * load_factor, 2
             ),
-            "power_consumption_kw": power,
+            "power_kw": power,
             "motor_temperature_c": round(
                 40 + power * 0.25 + random.uniform(-2, 2), 2
             ),
             "vibration_mm_s": round(
                 random.uniform(0.8, 3.5) * load_factor, 3
             ),
+            "efficiency_percent": round(
+                random.uniform(85, 98), 2
+            ),
             "status": "running" if air_flow > 30 else "idle",
         }
 
-    filename = "air_compressor.csv"
+    filename = "compressor.csv"
     return str(write_csv(filename, build_rows(system_id, timestamps, make_row)))
 
 

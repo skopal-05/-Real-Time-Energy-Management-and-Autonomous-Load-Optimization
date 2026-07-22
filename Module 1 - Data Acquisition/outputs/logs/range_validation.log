@@ -3,13 +3,25 @@ RANGE VALIDATION REPORT
 ======================================================================
 
 ----------------------------------------------------------------------
-Dataset : air_compressor.csv
+Dataset : compressor.csv
 ----------------------------------------------------------------------
 [PASS] air_flow_m3_min
-[PASS] discharge_pressure_bar
-[PASS] power_consumption_kw
+[FAIL] Column 'discharge_pressure_bar' not found
+[FAIL] Column 'power_consumption_kw' not found
 [PASS] motor_temperature_c
 [PASS] vibration_mm_s
+
+STATUS : FAILED
+
+----------------------------------------------------------------------
+Dataset : hvac.csv
+----------------------------------------------------------------------
+[PASS] power_kw
+[PASS] temperature_c
+[PASS] airflow_m3_min
+[PASS] humidity_percent
+[PASS] setpoint_temperature_c
+[PASS] efficiency_percent
 
 STATUS : PASSED
 
@@ -92,6 +104,6 @@ STATUS : PASSED
 ======================================================================
 SUMMARY
 ======================================================================
-Total Datasets : 8
+Total Datasets : 9
 Passed         : 8
-Failed         : 0
+Failed         : 1

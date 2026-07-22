@@ -21,12 +21,21 @@ LOG_FILE = LOG_DIR / "range_validation.log"
 
 RANGE_RULES = {
 
-    "air_compressor.csv": {
+    "compressor.csv": {
         "air_flow_m3_min": (20, 150),
         "discharge_pressure_bar": (0, 20),
         "power_consumption_kw": (0, 500),
         "motor_temperature_c": (0, 120),
         "vibration_mm_s": (0, 20),
+    },
+
+    "hvac.csv": {
+        "power_kw": (0, 100),
+        "temperature_c": (15, 35),
+        "airflow_m3_min": (0, 3000),
+        "humidity_percent": (0, 100),
+        "setpoint_temperature_c": (18, 30),
+        "efficiency_percent": (0, 100),
     },
 
     "battery_storage.csv": {

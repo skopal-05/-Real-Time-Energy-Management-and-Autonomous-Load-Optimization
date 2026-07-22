@@ -20,7 +20,8 @@ LOG_FILE = LOG_DIR / "missing_validation.log"
 # ==========================================================
 
 DATASETS = [
-    "air_compressor.csv",
+    "compressor.csv",
+    "hvac.csv",
     "battery_storage.csv",
     "boiler.csv",
     "grid.csv",
