@@ -1,0 +1,13 @@
+{
+    "generated_at": "2026-07-23 23:37:03",
+    "system_status": "Warning",
+    "renewable_score": 78.8,
+    "hvac_status": "Healthy",
+    "compressor_status": "Healthy",
+    "boiler_status": "Warning",
+    "available_scenarios": [
+        "optimistic",
+        "normal",
+        "worst_case"
+    ]
+}
