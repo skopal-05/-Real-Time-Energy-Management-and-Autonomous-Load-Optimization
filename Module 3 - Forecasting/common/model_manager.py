@@ -1,142 +1,447 @@
 """
-Centralized model manager for AI forecasting modules.
+Generic Machine Learning Model Manager
+for AI Forecasting Module.
 """
 
 from __future__ import annotations
 
-import pickle
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Iterable
+
+import joblib
+import pandas as pd
+
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import (
+    mean_absolute_error,
+    mean_squared_error,
+    r2_score,
+)
+from sklearn.preprocessing import LabelEncoder
+
+from common.utils import MODEL_DIR
 
 
 class ModelManager:
     """
-    Handles loading, saving and accessing forecasting models.
+    Generic manager responsible for:
+
+    - Model training
+    - Prediction
+    - Evaluation
+    - Saving / Loading models
+    - Saving / Loading encoders
+    - Encoding / Decoding values
     """
 
-    def __init__(self, model_directory: str = "models") -> None:
-
-        self.model_directory = Path(model_directory)
-        self.model_directory.mkdir(parents=True, exist_ok=True)
+    def __init__(self) -> None:
 
         self.models: Dict[str, Any] = {}
 
-    # ---------------------------------------------------------
-    # Register Model
-    # ---------------------------------------------------------
+        self.encoders: Dict[str, LabelEncoder] = {}
 
-    def register_model(self, model_name: str, model: Any) -> None:
+    # =====================================================
+    # Utility
+    # =====================================================
+
+    def is_model_loaded(
+        self,
+        model_name: str,
+    ) -> bool:
+
+        return model_name in self.models
+
+    def is_encoder_loaded(
+        self,
+        encoder_name: str,
+    ) -> bool:
+
+        return encoder_name in self.encoders
+
+    # =====================================================
+    # Training
+    # =====================================================
+
+    def train(
+        self,
+        model_name: str,
+        X_train: pd.DataFrame,
+        y_train: pd.Series,
+        **kwargs,
+    ) -> RandomForestRegressor:
+
+        model = RandomForestRegressor(
+
+            n_estimators=kwargs.get(
+                "n_estimators",
+                200,
+            ),
+
+            random_state=kwargs.get(
+                "random_state",
+                42,
+            ),
+
+            max_depth=kwargs.get(
+                "max_depth",
+                None,
+            ),
+
+            min_samples_split=kwargs.get(
+                "min_samples_split",
+                2,
+            ),
+
+            min_samples_leaf=kwargs.get(
+                "min_samples_leaf",
+                1,
+            ),
+
+            n_jobs=-1,
+        )
+
+        model.fit(
+            X_train,
+            y_train,
+        )
 
         self.models[model_name] = model
 
-    # ---------------------------------------------------------
-    # Get Model
-    # ---------------------------------------------------------
+        return model
 
-    def get_model(self, model_name: str):
+    # =====================================================
+    # Prediction
+    # =====================================================
 
-        return self.models.get(model_name)
+    def predict(
+        self,
+        model_name: str,
+        X: pd.DataFrame,
+    ):
 
-    # ---------------------------------------------------------
-    # Remove Model
-    # ---------------------------------------------------------
+        if not self.is_model_loaded(model_name):
 
-    def remove_model(self, model_name: str):
+            raise ValueError(
+                f"Model '{model_name}' is not loaded."
+            )
 
-        if model_name in self.models:
-            del self.models[model_name]
+        return self.models[
+            model_name
+        ].predict(X)
 
-    # ---------------------------------------------------------
+    # =====================================================
+    # Evaluation
+    # =====================================================
+
+    def evaluate(
+        self,
+        model_name: str,
+        X_test: pd.DataFrame,
+        y_test: pd.Series,
+    ) -> Dict[str, float]:
+
+        prediction = self.predict(
+            model_name,
+            X_test,
+        )
+
+        mse = mean_squared_error(
+            y_test,
+            prediction,
+        )
+
+        return {
+
+            "MAE": float(
+
+                mean_absolute_error(
+                    y_test,
+                    prediction,
+                )
+
+            ),
+
+            "MSE": float(
+                mse,
+            ),
+
+            "RMSE": float(
+                mse ** 0.5,
+            ),
+
+            "R2": float(
+
+                r2_score(
+                    y_test,
+                    prediction,
+                )
+
+            ),
+        }
+
+    # =====================================================
     # Save Model
-    # ---------------------------------------------------------
+    # =====================================================
 
-    def save_model(self, model_name: str) -> bool:
+    def save_model(
+        self,
+        model_name: str,
+    ) -> Path:
 
-        if model_name not in self.models:
-            return False
+        if not self.is_model_loaded(
+            model_name,
+        ):
 
-        filepath = self.model_directory / f"{model_name}.pkl"
+            raise ValueError(
+                f"Model '{model_name}' not found."
+            )
 
-        with open(filepath, "wb") as file:
-            pickle.dump(self.models[model_name], file)
+        filepath = (
+            MODEL_DIR /
+            f"{model_name}.joblib"
+        )
 
-        return True
+        joblib.dump(
 
-    # ---------------------------------------------------------
+            self.models[
+                model_name
+            ],
+
+            filepath,
+
+        )
+
+        return filepath
+
+    # =====================================================
     # Load Model
-    # ---------------------------------------------------------
+    # =====================================================
 
-    def load_model(self, model_name: str) -> bool:
+    def load_model(
+        self,
+        model_name: str,
+    ) -> bool:
 
-        filepath = self.model_directory / f"{model_name}.pkl"
+        if self.is_model_loaded(
+            model_name,
+        ):
+            return True
+
+        filepath = (
+            MODEL_DIR /
+            f"{model_name}.joblib"
+        )
 
         if not filepath.exists():
             return False
 
-        with open(filepath, "rb") as file:
-            self.models[model_name] = pickle.load(file)
+        self.models[
+            model_name
+        ] = joblib.load(
+            filepath,
+        )
 
         return True
 
-    # ---------------------------------------------------------
-    # Save All Models
-    # ---------------------------------------------------------
+        # =====================================================
+    # Save Encoder
+    # =====================================================
 
-    def save_all(self):
+    def save_encoder(
+        self,
+        encoder_name: str,
+        encoder: LabelEncoder,
+    ) -> Path:
 
-        for model_name in self.models:
-            self.save_model(model_name)
+        filepath = (
+            MODEL_DIR /
+            f"{encoder_name}.joblib"
+        )
 
-    # ---------------------------------------------------------
-    # Load All Models
-    # ---------------------------------------------------------
+        joblib.dump(
+            encoder,
+            filepath,
+        )
 
-    def load_all(self):
+        self.encoders[
+            encoder_name
+        ] = encoder
 
-        for file in self.model_directory.glob("*.pkl"):
+        return filepath
 
-            with open(file, "rb") as f:
-                self.models[file.stem] = pickle.load(f)
+    # =====================================================
+    # Load Encoder
+    # =====================================================
 
-    # ---------------------------------------------------------
-    # List Models
-    # ---------------------------------------------------------
+    def load_encoder(
+        self,
+        encoder_name: str,
+    ) -> bool:
 
-    def list_models(self):
+        if self.is_encoder_loaded(
+            encoder_name,
+        ):
+            return True
 
-        return list(self.models.keys())
+        filepath = (
+            MODEL_DIR /
+            f"{encoder_name}.joblib"
+        )
 
-    # ---------------------------------------------------------
-    # Clear Models
-    # ---------------------------------------------------------
+        if not filepath.exists():
+            return False
 
-    def clear(self):
+        self.encoders[
+            encoder_name
+        ] = joblib.load(
+            filepath,
+        )
 
-        self.models.clear()
+        return True
 
-    # ---------------------------------------------------------
-    # Model Information
-    # ---------------------------------------------------------
+    # =====================================================
+    # Encode
+    # =====================================================
 
-    def info(self):
+    def transform(
+        self,
+        encoder_name: str,
+        values: Iterable[Any],
+    ):
+
+        if not self.is_encoder_loaded(
+            encoder_name,
+        ):
+
+            raise ValueError(
+                f"Encoder '{encoder_name}' is not loaded."
+            )
+
+        return self.encoders[
+            encoder_name
+        ].transform(
+            values,
+        )
+
+    # =====================================================
+    # Decode
+    # =====================================================
+
+    def inverse_transform(
+        self,
+        encoder_name: str,
+        values: Iterable[Any],
+    ):
+
+        if not self.is_encoder_loaded(
+            encoder_name,
+        ):
+
+            raise ValueError(
+                f"Encoder '{encoder_name}' is not loaded."
+            )
+
+        return self.encoders[
+            encoder_name
+        ].inverse_transform(
+            values,
+        )
+
+    # =====================================================
+    # Feature Importance
+    # =====================================================
+
+    def feature_importance(
+        self,
+        model_name: str,
+        feature_names: Iterable[str],
+    ) -> Dict[str, float]:
+
+        if not self.is_model_loaded(
+            model_name,
+        ):
+
+            raise ValueError(
+                f"Model '{model_name}' is not loaded."
+            )
+
+        model = self.models[
+            model_name
+        ]
+
+        if not hasattr(
+            model,
+            "feature_importances_",
+        ):
+
+            raise AttributeError(
+                "Model does not support feature importance."
+            )
 
         return {
-            "registered_models": len(self.models),
-            "models": self.list_models(),
-            "directory": str(self.model_directory),
+
+            feature: float(score)
+
+            for feature, score in zip(
+
+                feature_names,
+
+                model.feature_importances_,
+
+            )
+
         }
 
-    def __len__(self):
+    # =====================================================
+    # Information
+    # =====================================================
 
-        return len(self.models)
+    def info(
+        self,
+    ) -> Dict[str, Any]:
 
-    def __contains__(self, model_name):
+        return {
 
-        return model_name in self.models
+            "loaded_models":
+                list(
+                    self.models.keys()
+                ),
 
-    def __str__(self):
+            "loaded_encoders":
+                list(
+                    self.encoders.keys()
+                ),
+        }
+
+    # =====================================================
+    # Magic Methods
+    # =====================================================
+
+    def __contains__(
+        self,
+        item: str,
+    ) -> bool:
 
         return (
-            f"ModelManager("
-            f"{len(self.models)} models)"
+            item in self.models
+        )
+
+    def __len__(
+        self,
+    ) -> int:
+
+        return len(
+            self.models
+        )
+
+    def __str__(
+        self,
+    ) -> str:
+
+        return (
+
+            "ModelManager("
+            f"{len(self.models)} models, "
+            f"{len(self.encoders)} encoders)"
+
         )

@@ -1,22 +1,29 @@
 """
-Base class for all forecasting modules used in the
-Generative Digital Twin AI Forecasting System.
+Base class for AI Forecasting models.
 """
 
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from datetime import datetime
-from typing import Dict, Any
+from typing import Any, Dict
+
+from common.utils import (
+    current_timestamp,
+    round_values,
+)
 
 
 class ForecastingBase(ABC):
     """
-    Abstract base class for all forecasting models.
+    Base class for all AI forecasting modules.
 
-    Every forecasting module (HVAC, Boiler, Compressor,
-    Solar, Battery, Production etc.) should inherit from
-    this class.
+    Pipeline
+    --------
+    preprocess()
+        ↓
+    predict()
+        ↓
+    postprocess()
     """
 
     def __init__(
@@ -24,91 +31,142 @@ class ForecastingBase(ABC):
         model_name: str,
         prediction_horizon: int = 60,
     ) -> None:
-        """
-        Parameters
-        ----------
-        model_name : str
-            Name of forecasting model.
-
-        prediction_horizon : int
-            Future prediction window (minutes).
-        """
 
         self.model_name = model_name
         self.prediction_horizon = prediction_horizon
-        self.last_prediction = None
-        self.last_timestamp = None
+
+    # =====================================================
+    # Abstract Methods
+    # =====================================================
 
     @abstractmethod
-    def preprocess(self, sensor_data: Dict[str, Any]) -> Dict[str, Any]:
+    def preprocess(
+        self,
+        sensor_data: Dict[str, Any],
+    ) -> Any:
         """
-        Prepare sensor data before prediction.
+        Convert raw sensor data into
+        model-ready input.
         """
         pass
 
     @abstractmethod
-    def predict(self, processed_data: Dict[str, Any]) -> Dict[str, Any]:
+    def predict(
+        self,
+        processed_data: Any,
+    ) -> Dict[str, Any]:
         """
-        Generate future prediction.
-        """
-        pass
-
-    @abstractmethod
-    def postprocess(self, prediction: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Apply post-processing to prediction.
+        Run AI prediction.
         """
         pass
 
-    def forecast(self, sensor_data: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Complete forecasting pipeline.
+    # =====================================================
+    # Post Processing
+    # =====================================================
 
-        Sensor Data
-              ↓
-        Preprocess
-              ↓
-        Predict
-              ↓
-        Postprocess
-        """
+    def postprocess(
+        self,
+        prediction: Dict[str, Any],
+    ) -> Dict[str, Any]:
 
-        processed = self.preprocess(sensor_data)
+        result = round_values(
+            prediction,
+        )
 
-        prediction = self.predict(processed)
+        result["model"] = self.model_name
 
-        result = self.postprocess(prediction)
+        result["prediction_horizon"] = (
+            self.prediction_horizon
+        )
 
-        self.last_prediction = result
-        self.last_timestamp = datetime.now()
+        result["timestamp"] = (
+            current_timestamp()
+        )
 
         return result
 
-    def get_last_prediction(self):
+    # =====================================================
+    # Forecast Pipeline
+    # =====================================================
 
-        return self.last_prediction
+    def forecast(
+        self,
+        sensor_data: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        """
+        Complete forecasting pipeline.
+        """
 
-    def get_last_timestamp(self):
+        processed_data = self.preprocess(
+            sensor_data,
+        )
 
-        return self.last_timestamp
+        prediction = self.predict(
+            processed_data,
+        )
 
-    def reset(self):
+        return self.postprocess(
+            prediction,
+        )
 
-        self.last_prediction = None
-        self.last_timestamp = None
+    # =====================================================
+    # Configuration
+    # =====================================================
 
-    def info(self) -> Dict[str, Any]:
+    def set_prediction_horizon(
+        self,
+        minutes: int,
+    ) -> None:
+
+        self.prediction_horizon = minutes
+
+    def get_prediction_horizon(
+        self,
+    ) -> int:
+
+        return self.prediction_horizon
+
+    # =====================================================
+    # Information
+    # =====================================================
+
+    def info(
+        self,
+    ) -> Dict[str, Any]:
 
         return {
-            "model_name": self.model_name,
-            "prediction_horizon": self.prediction_horizon,
-            "last_prediction": self.last_prediction,
-            "last_timestamp": self.last_timestamp,
+
+            "model_name":
+                self.model_name,
+
+            "prediction_horizon":
+                self.prediction_horizon,
         }
 
-    def __str__(self):
+    # =====================================================
+    # Magic Methods
+    # =====================================================
+
+    def __str__(
+        self,
+    ) -> str:
 
         return (
-            f"{self.model_name}"
-            f"(Horizon={self.prediction_horizon} min)"
+            f"{self.__class__.__name__}"
+            f"({self.model_name})"
+        )
+
+    def __repr__(
+        self,
+    ) -> str:
+
+        return (
+
+            f"{self.__class__.__name__}("
+
+            f"model_name='{self.model_name}', "
+
+            f"prediction_horizon="
+            f"{self.prediction_horizon})"
+
         )

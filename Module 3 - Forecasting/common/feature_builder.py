@@ -1,118 +1,187 @@
 """
-Builds AI-ready features from Digital Twin sensor data.
+Feature preprocessing for AI Forecasting Module.
 """
 
 from __future__ import annotations
 
-from statistics import mean
-from typing import Dict, Any, List
+from typing import Any, Dict, List, Optional
+
+import pandas as pd
+
+from common.model_manager import ModelManager
 
 
 class FeatureBuilder:
     """
-    Converts raw sensor data into forecasting features.
+    Prepares sensor data for machine learning models.
+
+    Responsibilities
+    ----------------
+    - Remove unnecessary columns
+    - Handle missing values
+    - Encode categorical features
+    - Return ordered DataFrame
     """
 
-    def __init__(self):
+    def __init__(
+        self,
+        model_manager: Optional[ModelManager] = None,
+    ) -> None:
 
-        self.history: List[Dict[str, Any]] = []
+        self.model_manager = model_manager
 
-    # ---------------------------------------------------------
-    # Store Sensor History
-    # ---------------------------------------------------------
+    # =====================================================
+    # Internal Helpers
+    # =====================================================
 
-    def update(self, sensor_data: Dict[str, Any]) -> None:
+    def _encode_value(
+        self,
+        column: str,
+        value: Any,
+        encoder_mapping: Dict[str, str],
+    ) -> Any:
 
-        self.history.append(sensor_data)
+        if (
+            self.model_manager is None
+            or column not in encoder_mapping
+        ):
+            return value
 
-        if len(self.history) > 100:
-            self.history.pop(0)
+        encoder_name = encoder_mapping[column]
 
-    # ---------------------------------------------------------
+        return self.model_manager.transform(
+            encoder_name,
+            [value],
+        )[0]
+
+    # =====================================================
     # Build Features
-    # ---------------------------------------------------------
+    # =====================================================
 
-    def build(self, sensor_data: Dict[str, Any]) -> Dict[str, float]:
+    def build(
+        self,
+        sensor_data: Dict[str, Any],
+        feature_columns: List[str],
+        encoder_mapping: Optional[Dict[str, str]] = None,
+    ) -> pd.DataFrame:
 
-        self.update(sensor_data)
+        encoder_mapping = encoder_mapping or {}
 
-        features = {}
+        processed: Dict[str, Any] = {}
 
-        for key, value in sensor_data.items():
+        for column in feature_columns:
 
-            if isinstance(value, (int, float)):
-                features[key] = float(value)
+            value = sensor_data.get(column, 0)
 
-        features["history_size"] = len(self.history)
+            if value is None:
+                value = 0
 
-        features.update(self._moving_averages())
+            value = self._encode_value(
+                column,
+                value,
+                encoder_mapping,
+            )
 
-        return features
+            processed[column] = value
 
-    # ---------------------------------------------------------
-    # Moving Average Features
-    # ---------------------------------------------------------
+        return pd.DataFrame(
+            [processed],
+            columns=feature_columns,
+        )
 
-    def _moving_averages(self) -> Dict[str, float]:
+    # =====================================================
+    # Select Features
+    # =====================================================
 
-        result = {}
+    @staticmethod
+    def select(
+        dataframe: pd.DataFrame,
+        feature_columns: List[str],
+    ) -> pd.DataFrame:
 
-        if len(self.history) < 2:
-            return result
+        return dataframe[
+            feature_columns
+        ].copy()
 
-        numeric_keys = []
+    # =====================================================
+    # Drop Columns
+    # =====================================================
 
-        for key, value in self.history[-1].items():
-            if isinstance(value, (int, float)):
-                numeric_keys.append(key)
+    @staticmethod
+    def drop(
+        dataframe: pd.DataFrame,
+        columns: List[str],
+    ) -> pd.DataFrame:
 
-        for key in numeric_keys:
+        return dataframe.drop(
+            columns=columns,
+            errors="ignore",
+        )
 
-            values = []
+    # =====================================================
+    # Fill Missing Values
+    # =====================================================
 
-            for sample in self.history:
+    @staticmethod
+    def fill_missing(
+        dataframe: pd.DataFrame,
+        value: Any = 0,
+    ) -> pd.DataFrame:
 
-                if key in sample:
-                    values.append(sample[key])
+        return dataframe.fillna(value)
 
-            if values:
-                result[f"{key}_avg"] = mean(values)
+    # =====================================================
+    # Feature Names
+    # =====================================================
 
-        return result
+    @staticmethod
+    def feature_names(
+        dataframe: pd.DataFrame,
+    ) -> List[str]:
 
-    # ---------------------------------------------------------
-    # Reset
-    # ---------------------------------------------------------
+        return list(dataframe.columns)
 
-    def reset(self):
+    # =====================================================
+    # Shape
+    # =====================================================
 
-        self.history.clear()
+    @staticmethod
+    def shape(
+        dataframe: pd.DataFrame,
+    ) -> tuple[int, int]:
 
-    # ---------------------------------------------------------
-    # Get History
-    # ---------------------------------------------------------
+        return dataframe.shape
 
-    def get_history(self):
-
-        return self.history
-
-    # ---------------------------------------------------------
+    # =====================================================
     # Information
-    # ---------------------------------------------------------
+    # =====================================================
 
-    def info(self):
+    def info(
+        self,
+    ) -> Dict[str, Any]:
 
         return {
-            "samples": len(self.history)
+
+            "builder": "FeatureBuilder",
+
+            "handles_missing_values": True,
+
+            "handles_encoding": (
+                self.model_manager is not None
+            ),
+
+            "returns": "pandas.DataFrame",
         }
 
-    def __len__(self):
+    # =====================================================
+    # Magic Methods
+    # =====================================================
 
-        return len(self.history)
-
-    def __str__(self):
+    def __str__(
+        self,
+    ) -> str:
 
         return (
-            f"FeatureBuilder("
-            f"samples={len(self.history)})"
+            "FeatureBuilder("
+            "Data Cleaning + Encoding)"
         )

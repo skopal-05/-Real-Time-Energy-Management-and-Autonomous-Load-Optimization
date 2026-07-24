@@ -1,95 +1,170 @@
+"""
+Production Forecasting Module.
+"""
+
 from __future__ import annotations
 
 from typing import Any, Dict
 
-from common.feature_builder import FeatureBuilder
+import pandas as pd
+
+from common.config import MODULE_CONFIG
 from common.forecasting_base import ForecastingBase
-from common.utils import current_timestamp, round_values
+from common.model_manager import ModelManager
 
 
 class ProductionForecast(ForecastingBase):
     """
-    Forecast future production performance.
+    Forecast production output using the trained Random Forest model.
     """
 
-    def __init__(self, prediction_horizon: int = 60):
+    def __init__(self) -> None:
+
+        config = MODULE_CONFIG["production"]
 
         super().__init__(
-            model_name="Production Forecast",
-            prediction_horizon=prediction_horizon,
+            model_name=config["model"],
+            prediction_horizon=1,
         )
 
-        self.feature_builder = FeatureBuilder()
+        self.config = config
+
+        self.features = config["features"]
+
+        self.target = config["target"]
+
+        self.encoders = config["encoders"]
+
+        self.manager = ModelManager()
+
+        if not self.manager.load_model(self.model_name):
+            raise FileNotFoundError(
+                f"Model '{self.model_name}' not found."
+            )
+
+        for _, encoder_name in self.encoders.items():
+
+            self.manager.load_encoder(
+                encoder_name,
+            )
+
+    # -------------------------------------------------
+    # Preprocessing
+    # -------------------------------------------------
 
     def preprocess(
         self,
-        sensor_data: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        state: Dict[str, Any],
+    ) -> pd.DataFrame:
+        """
+        Convert the incoming production state into a model-ready DataFrame.
+        """
 
-        return self.feature_builder.build(sensor_data)
+        processed = {}
+
+        for feature in self.features:
+
+            value = state.get(feature, 0)
+
+            if value is None:
+                value = 0
+
+            if feature in self.encoders:
+
+                encoder = self.manager.encoders[
+                    self.encoders[feature]
+                ]
+
+                value = encoder.transform(
+                    [value]
+                )[0]
+
+            processed[feature] = value
+
+        return pd.DataFrame(
+            [processed],
+            columns=self.features,
+        )
+
+    # -------------------------------------------------
+    # Prediction
+    # -------------------------------------------------
 
     def predict(
         self,
-        processed_data: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        processed_state: pd.DataFrame,
+    ) -> float:
+        """
+        Predict the next production output.
+        """
 
-        production_rate = processed_data.get(
-            "production_rate",
-            processed_data.get("production_rate_avg", 100),
+        prediction = self.manager.predict(
+            self.model_name,
+            processed_state,
         )
 
-        machine_utilization = processed_data.get(
-            "machine_utilization",
-            processed_data.get("machine_utilization_avg", 80),
+        return float(
+            prediction[0]
         )
 
-        energy_consumption = processed_data.get(
-            "energy_consumption",
-            processed_data.get("energy_consumption_avg", 250),
-        )
-
-        defect_rate = processed_data.get(
-            "defect_rate",
-            processed_data.get("defect_rate_avg", 2),
-        )
-
-        predicted_production = production_rate * 1.02
-        predicted_utilization = min(
-            machine_utilization + 1,
-            100,
-        )
-
-        predicted_energy = energy_consumption * 1.01
-
-        predicted_defects = max(
-            defect_rate - 0.1,
-            0,
-        )
-
-        productivity_score = max(
-            0,
-            min(
-                100,
-                predicted_utilization - predicted_defects,
-            ),
-        )
-
-        return {
-            "predicted_production": predicted_production,
-            "predicted_utilization": predicted_utilization,
-            "predicted_energy_consumption": predicted_energy,
-            "predicted_defect_rate": predicted_defects,
-            "productivity_score": productivity_score,
-        }
+    # -------------------------------------------------
+    # Post Processing
+    # -------------------------------------------------
 
     def postprocess(
         self,
-        prediction: Dict[str, Any],
+        prediction: float,
     ) -> Dict[str, Any]:
+        """
+        Convert prediction into the standard forecast format.
+        """
 
-        result = round_values(prediction)
+        return {
+            self.target: round(
+                prediction,
+                2,
+            )
+        }
 
-        result["prediction_horizon"] = self.prediction_horizon
-        result["timestamp"] = current_timestamp()
+    # -------------------------------------------------
+    # Forecast
+    # -------------------------------------------------
 
-        return result
+    def forecast(
+        self,
+        state: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        """
+        Generate a production forecast from the current state.
+        """
+
+        processed_state = self.preprocess(
+            state,
+        )
+
+        prediction = self.predict(
+            processed_state,
+        )
+
+        return self.postprocess(
+            prediction,
+        )
+
+    # -------------------------------------------------
+    # Model Information
+    # -------------------------------------------------
+
+    def model_info(
+        self,
+    ) -> Dict[str, Any]:
+        """
+        Return metadata about the forecasting model.
+        """
+
+        return {
+            "module": "production",
+            "model": self.model_name,
+            "target": self.target,
+            "features": self.features,
+            "prediction_horizon": self.prediction_horizon,
+        }

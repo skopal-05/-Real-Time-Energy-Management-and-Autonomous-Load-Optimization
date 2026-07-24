@@ -1,83 +1,170 @@
+"""
+Compressor Forecasting Module.
+"""
+
 from __future__ import annotations
 
 from typing import Any, Dict
 
-from common.feature_builder import FeatureBuilder
+import pandas as pd
+
+from common.config import MODULE_CONFIG
 from common.forecasting_base import ForecastingBase
-from common.utils import current_timestamp, round_values
+from common.model_manager import ModelManager
 
 
 class CompressorForecast(ForecastingBase):
     """
-    Forecast future compressor operating conditions.
+    Forecast compressor power consumption using the trained Random Forest model.
     """
 
-    def __init__(self, prediction_horizon: int = 60):
+    def __init__(self) -> None:
+
+        config = MODULE_CONFIG["compressor"]
 
         super().__init__(
-            model_name="Compressor Forecast",
-            prediction_horizon=prediction_horizon,
+            model_name=config["model"],
+            prediction_horizon=1,
         )
 
-        self.feature_builder = FeatureBuilder()
+        self.config = config
 
-    # ---------------------------------------------------------
+        self.features = config["features"]
+
+        self.target = config["target"]
+
+        self.encoders = config["encoders"]
+
+        self.manager = ModelManager()
+
+        if not self.manager.load_model(self.model_name):
+            raise FileNotFoundError(
+                f"Model '{self.model_name}' not found."
+            )
+
+        for _, encoder_name in self.encoders.items():
+
+            self.manager.load_encoder(
+                encoder_name,
+            )
+
+    # -------------------------------------------------
+    # Preprocessing
+    # -------------------------------------------------
 
     def preprocess(
         self,
-        sensor_data: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        state: Dict[str, Any],
+    ) -> pd.DataFrame:
+        """
+        Convert the incoming compressor state into a model-ready DataFrame.
+        """
 
-        return self.feature_builder.build(sensor_data)
+        processed = {}
 
-    # ---------------------------------------------------------
+        for feature in self.features:
+
+            value = state.get(feature, 0)
+
+            if value is None:
+                value = 0
+
+            if feature in self.encoders:
+
+                encoder = self.manager.encoders[
+                    self.encoders[feature]
+                ]
+
+                value = encoder.transform(
+                    [value]
+                )[0]
+
+            processed[feature] = value
+
+        return pd.DataFrame(
+            [processed],
+            columns=self.features,
+        )
+
+    # -------------------------------------------------
+    # Prediction
+    # -------------------------------------------------
 
     def predict(
         self,
-        processed_data: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        processed_state: pd.DataFrame,
+    ) -> float:
+        """
+        Predict the compressor power requirement.
+        """
 
-        pressure = processed_data.get(
-            "pressure",
-            processed_data.get("pressure_avg", 7.0),
+        prediction = self.manager.predict(
+            self.model_name,
+            processed_state,
         )
 
-        airflow = processed_data.get(
-            "airflow",
-            processed_data.get("airflow_avg", 120),
+        return float(
+            prediction[0]
         )
 
-        power = processed_data.get(
-            "power",
-            processed_data.get("power_avg", 0),
-        )
-
-        predicted_pressure = pressure + 0.10
-        predicted_airflow = airflow - 1.5
-        predicted_power = power * 1.02
-
-        health_score = max(
-            0,
-            100 - (predicted_power / 25),
-        )
-
-        return {
-            "predicted_pressure": predicted_pressure,
-            "predicted_airflow": predicted_airflow,
-            "predicted_power": predicted_power,
-            "health_score": health_score,
-        }
-
-    # ---------------------------------------------------------
+    # -------------------------------------------------
+    # Post Processing
+    # -------------------------------------------------
 
     def postprocess(
         self,
-        prediction: Dict[str, Any],
+        prediction: float,
     ) -> Dict[str, Any]:
+        """
+        Convert prediction into the standard forecast format.
+        """
 
-        result = round_values(prediction)
+        return {
+            "compressor_power_kw": round(
+                prediction,
+                2,
+            )
+        }
 
-        result["prediction_horizon"] = self.prediction_horizon
-        result["timestamp"] = current_timestamp()
+    # -------------------------------------------------
+    # Forecast
+    # -------------------------------------------------
 
-        return result
+    def forecast(
+        self,
+        state: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        """
+        Generate compressor power forecast from the current state.
+        """
+
+        processed_state = self.preprocess(
+            state,
+        )
+
+        prediction = self.predict(
+            processed_state,
+        )
+
+        return self.postprocess(
+            prediction,
+        )
+
+    # -------------------------------------------------
+    # Model Information
+    # -------------------------------------------------
+
+    def model_info(
+        self,
+    ) -> Dict[str, Any]:
+        """
+        Return metadata about the forecasting model.
+        """
+
+        return {
+            "module": "compressor",
+            "model": self.model_name,
+            "target": self.target,
+            "features": self.features,
+            "prediction_horizon": self.prediction_horizon,
+        }

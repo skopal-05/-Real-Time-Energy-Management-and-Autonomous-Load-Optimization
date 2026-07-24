@@ -1,152 +1,351 @@
 """
-Utility functions for AI Forecasting Module.
+Common utility functions for AI Forecasting Module.
 """
 
 from __future__ import annotations
 
 import json
-from datetime import datetime
+import random
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict
 
+import joblib
+import numpy as np
+import pandas as pd
 
-# ---------------------------------------------------------
-# Timestamp
-# ---------------------------------------------------------
+
+# ==========================================================
+# Directories
+# ==========================================================
+
+ROOT_DIR = Path(__file__).resolve().parent.parent
+
+MODEL_DIR = ROOT_DIR / "models"
+OUTPUT_DIR = ROOT_DIR / "outputs"
+
+MODEL_DIR.mkdir(
+    parents=True,
+    exist_ok=True,
+)
+
+OUTPUT_DIR.mkdir(
+    parents=True,
+    exist_ok=True,
+)
+
+
+# ==========================================================
+# Time Utilities
+# ==========================================================
 
 def current_timestamp() -> str:
+    """Return current timestamp."""
+
+    return datetime.now().strftime(
+        "%Y-%m-%d %H:%M:%S"
+    )
+
+
+def timestamp() -> str:
     """
-    Returns current timestamp.
-    """
-
-    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-
-# ---------------------------------------------------------
-# Create Directory
-# ---------------------------------------------------------
-
-def ensure_directory(path: str) -> Path:
-    """
-    Creates directory if it doesn't exist.
+    Alias for current_timestamp().
     """
 
-    directory = Path(path)
-    directory.mkdir(parents=True, exist_ok=True)
-
-    return directory
+    return current_timestamp()
 
 
-# ---------------------------------------------------------
-# Save JSON
-# ---------------------------------------------------------
+def future_timestamp(
+    minutes: int,
+) -> str:
+    """Return future timestamp."""
 
-def save_json(data: Dict[str, Any], filepath: str) -> None:
-    """
-    Save dictionary to JSON file.
-    """
+    return (
+
+        datetime.now()
+
+        + timedelta(minutes=minutes)
+
+    ).strftime("%Y-%m-%d %H:%M:%S")
+
+
+# ==========================================================
+# Directory Utilities
+# ==========================================================
+
+def ensure_directory(
+    path: Path | str,
+) -> Path:
+
+    path = Path(path)
+
+    path.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    return path
+
+
+# ==========================================================
+# JSON Utilities
+# ==========================================================
+
+def save_json(
+    data: Dict[str, Any],
+    filepath: Path | str,
+) -> None:
 
     filepath = Path(filepath)
 
-    filepath.parent.mkdir(parents=True, exist_ok=True)
+    ensure_directory(
+        filepath.parent,
+    )
 
-    with open(filepath, "w", encoding="utf-8") as file:
+    with open(
+        filepath,
+        "w",
+        encoding="utf-8",
+    ) as file:
+
         json.dump(
             data,
             file,
-            indent=4
+            indent=4,
+            ensure_ascii=False,
         )
 
 
-# ---------------------------------------------------------
-# Load JSON
-# ---------------------------------------------------------
+def load_json(
+    filepath: Path | str,
+) -> Dict[str, Any]:
 
-def load_json(filepath: str) -> Dict[str, Any]:
-    """
-    Load JSON file.
-    """
+    filepath = Path(filepath)
 
-    with open(filepath, "r", encoding="utf-8") as file:
+    if not filepath.exists():
+
+        raise FileNotFoundError(
+            f"{filepath} not found."
+        )
+
+    with open(
+        filepath,
+        "r",
+        encoding="utf-8",
+    ) as file:
+
         return json.load(file)
 
 
-# ---------------------------------------------------------
-# Clamp Value
-# ---------------------------------------------------------
+# ==========================================================
+# CSV Utilities
+# ==========================================================
 
-def clamp(value: float, minimum: float, maximum: float) -> float:
-    """
-    Restrict value between min and max.
-    """
+def load_csv(
+    filepath: Path | str,
+) -> pd.DataFrame:
 
-    return max(minimum, min(value, maximum))
+    filepath = Path(filepath)
+
+    if not filepath.exists():
+
+        raise FileNotFoundError(
+            f"{filepath} not found."
+        )
+
+    return pd.read_csv(
+        filepath,
+    )
 
 
-# ---------------------------------------------------------
-# Percentage Change
-# ---------------------------------------------------------
+def save_csv(
+    dataframe: pd.DataFrame,
+    filepath: Path | str,
+) -> None:
 
-def percentage_change(old: float, new: float) -> float:
-    """
-    Calculate percentage change.
-    """
+    filepath = Path(filepath)
+
+    ensure_directory(
+        filepath.parent,
+    )
+
+    dataframe.to_csv(
+        filepath,
+        index=False,
+    )
+
+
+# ==========================================================
+# Model Utilities
+# ==========================================================
+
+def save_model(
+    obj: Any,
+    filename: str,
+) -> Path:
+
+    ensure_directory(
+        MODEL_DIR,
+    )
+
+    filepath = MODEL_DIR / filename
+
+    joblib.dump(
+        obj,
+        filepath,
+    )
+
+    return filepath
+
+
+def load_model(
+    filename: str,
+) -> Any:
+
+    filepath = MODEL_DIR / filename
+
+    if not filepath.exists():
+
+        raise FileNotFoundError(
+            f"{filepath} not found."
+        )
+
+    return joblib.load(
+        filepath,
+    )
+
+
+# ==========================================================
+# Numeric Utilities
+# ==========================================================
+
+def clamp(
+    value: float,
+    minimum: float,
+    maximum: float,
+) -> float:
+
+    return max(
+        minimum,
+        min(
+            maximum,
+            value,
+        ),
+    )
+
+
+def normalize(
+    value: float,
+    minimum: float,
+    maximum: float,
+) -> float:
+
+    if maximum == minimum:
+        return 0.0
+
+    return (
+
+        value - minimum
+
+    ) / (
+
+        maximum - minimum
+
+    )
+
+
+def percentage_change(
+    old: float,
+    new: float,
+) -> float:
 
     if old == 0:
         return 0.0
 
-    return ((new - old) / old) * 100
+    return (
+
+        (new - old)
+
+        / old
+
+    ) * 100
 
 
-# ---------------------------------------------------------
-# Round Dictionary Values
-# ---------------------------------------------------------
+# ==========================================================
+# Formatting
+# ==========================================================
 
-def round_values(data: Dict[str, Any], digits: int = 2) -> Dict[str, Any]:
+def round_values(
+    data: Dict[str, Any],
+    digits: int = 2,
+) -> Dict[str, Any]:
 
-    rounded = {}
+    rounded: Dict[str, Any] = {}
 
     for key, value in data.items():
 
-        if isinstance(value, float):
-            rounded[key] = round(value, digits)
+        if isinstance(
+            value,
+            (int, float, np.number),
+        ):
+
+            rounded[key] = round(
+                float(value),
+                digits,
+            )
 
         else:
+
             rounded[key] = value
 
     return rounded
 
 
-# ---------------------------------------------------------
-# Normalize Value
-# ---------------------------------------------------------
+# ==========================================================
+# Random Seed
+# ==========================================================
 
-def normalize(
-    value: float,
-    minimum: float,
-    maximum: float
-) -> float:
-    """
-    Normalize between 0 and 1.
-    """
+def set_random_seed(
+    seed: int = 42,
+) -> int:
 
-    if maximum == minimum:
-        return 0.0
+    random.seed(seed)
 
-    return (value - minimum) / (maximum - minimum)
+    np.random.seed(seed)
+
+    return seed
 
 
-# ---------------------------------------------------------
-# Future Timestamp
-# ---------------------------------------------------------
+# ==========================================================
+# File Information
+# ==========================================================
 
-def future_timestamp(minutes: int) -> str:
-    """
-    Returns future timestamp.
-    """
+def file_exists(
+    filepath: Path | str,
+) -> bool:
 
-    future = datetime.now().timestamp() + (minutes * 60)
+    return Path(
+        filepath,
+    ).exists()
 
-    return datetime.fromtimestamp(
-        future
-    ).strftime("%Y-%m-%d %H:%M:%S")
+
+# ==========================================================
+# Module Information
+# ==========================================================
+
+def info() -> Dict[str, Any]:
+
+    return {
+
+        "root_directory":
+            str(ROOT_DIR),
+
+        "model_directory":
+            str(MODEL_DIR),
+
+        "output_directory":
+            str(OUTPUT_DIR),
+
+        "generated_at":
+            current_timestamp(),
+    }

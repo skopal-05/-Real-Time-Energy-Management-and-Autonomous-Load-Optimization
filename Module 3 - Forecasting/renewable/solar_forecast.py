@@ -1,52 +1,150 @@
+"""
+Solar Forecasting Module.
+"""
+
 from __future__ import annotations
 
 from typing import Any, Dict
 
-from common.feature_builder import FeatureBuilder
+import pandas as pd
+
+from common.config import MODULE_CONFIG
 from common.forecasting_base import ForecastingBase
-from common.utils import current_timestamp, round_values
+from common.model_manager import ModelManager
 
 
 class SolarForecast(ForecastingBase):
+    """
+    Forecast solar DC power using the trained Random Forest model.
+    """
 
-    def __init__(self, prediction_horizon: int = 60):
+    def __init__(self) -> None:
+
+        config = MODULE_CONFIG["solar"]
 
         super().__init__(
-            model_name="Solar Forecast",
-            prediction_horizon=prediction_horizon,
+            model_name=config["model"],
+            prediction_horizon=1,
         )
 
-        self.feature_builder = FeatureBuilder()
+        self.config = config
 
-    def preprocess(self, sensor_data: Dict[str, Any]) -> Dict[str, Any]:
+        self.features = config["features"]
 
-        return self.feature_builder.build(sensor_data)
+        self.target = config["target"]
 
-    def predict(self, processed_data: Dict[str, Any]) -> Dict[str, Any]:
+        self.encoders = config["encoders"]
 
-        solar_irradiance = processed_data.get(
-            "solar_irradiance",
-            processed_data.get("solar_irradiance_avg", 700),
+        self.manager = ModelManager()
+
+        if not self.manager.load_model(self.model_name):
+            raise FileNotFoundError(
+                f"Model '{self.model_name}' not found."
+            )
+
+        for _, encoder_name in self.encoders.items():
+
+            self.manager.load_encoder(
+                encoder_name,
+            )
+
+    # -------------------------------------------------
+    # Preprocessing
+    # -------------------------------------------------
+
+    def preprocess(
+        self,
+        state: Dict[str, Any],
+    ) -> pd.DataFrame:
+
+        processed = {}
+
+        for feature in self.features:
+
+            value = state.get(feature, 0)
+
+            if value is None:
+                value = 0
+
+            if feature in self.encoders:
+
+                encoder = self.manager.encoders[
+                    self.encoders[feature]
+                ]
+
+                value = encoder.transform(
+                    [value]
+                )[0]
+
+            processed[feature] = value
+
+        return pd.DataFrame(
+            [processed],
+            columns=self.features,
         )
 
-        panel_efficiency = processed_data.get(
-            "panel_efficiency",
-            processed_data.get("panel_efficiency_avg", 90),
+    # -------------------------------------------------
+    # Prediction
+    # -------------------------------------------------
+
+    def predict(
+        self,
+        processed_state: pd.DataFrame,
+    ) -> float:
+
+        prediction = self.manager.predict(
+            self.model_name,
+            processed_state,
         )
 
-        power_output = (
-            solar_irradiance * panel_efficiency
-        ) / 1000
+        return float(prediction[0])
+
+    # -------------------------------------------------
+    # Post Processing
+    # -------------------------------------------------
+
+    def postprocess(
+        self,
+        prediction: float,
+    ) -> Dict[str, Any]:
 
         return {
-            "predicted_solar_output": power_output,
-            "predicted_efficiency": panel_efficiency,
+            self.target: round(prediction, 2),
         }
 
-    def postprocess(self, prediction: Dict[str, Any]) -> Dict[str, Any]:
+    # -------------------------------------------------
+    # Forecast
+    # -------------------------------------------------
 
-        result = round_values(prediction)
-        result["prediction_horizon"] = self.prediction_horizon
-        result["timestamp"] = current_timestamp()
+    def forecast(
+        self,
+        state: Dict[str, Any],
+    ) -> Dict[str, Any]:
 
-        return result
+        processed_state = self.preprocess(
+            state,
+        )
+
+        prediction = self.predict(
+            processed_state,
+        )
+
+        return self.postprocess(
+            prediction,
+        )
+
+    # -------------------------------------------------
+    # Model Information
+    # -------------------------------------------------
+
+    def model_info(
+        self,
+    ) -> Dict[str, Any]:
+
+        return {
+            "module": "solar",
+            "model": self.model_name,
+            "target": self.target,
+            "features": self.features,
+            "prediction_horizon": self.prediction_horizon,
+        }

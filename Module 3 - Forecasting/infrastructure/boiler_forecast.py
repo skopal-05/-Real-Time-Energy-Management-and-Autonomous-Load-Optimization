@@ -1,84 +1,145 @@
+"""
+Boiler Forecasting Module.
+"""
+
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any, Dict
 
-from common.feature_builder import FeatureBuilder
+import pandas as pd
+
+from common.config import MODULE_CONFIG
 from common.forecasting_base import ForecastingBase
-from common.utils import current_timestamp, round_values
+from common.model_manager import ModelManager
 
 
 class BoilerForecast(ForecastingBase):
     """
-    Forecast future boiler operating conditions.
+    Forecast boiler steam flow using the trained Random Forest model.
     """
 
-    def __init__(self, prediction_horizon: int = 60):
+    def __init__(self) -> None:
+
+        config = MODULE_CONFIG["boiler"]
 
         super().__init__(
-            model_name="Boiler Forecast",
-            prediction_horizon=prediction_horizon,
+            model_name=config["model"],
+            prediction_horizon=1,
         )
 
-        self.feature_builder = FeatureBuilder()
+        self.config = config
+
+        self.features = config["features"]
+
+        self.target = config["target"]
+
+        self.manager = ModelManager()
+
+        self.manager.load_model(
+            self.model_name
+        )
+
+    # -------------------------------------------------
+    # Preprocessing
+    # -------------------------------------------------
 
     def preprocess(
         self,
-        sensor_data: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        state: Dict[str, Any],
+    ) -> pd.DataFrame:
+        """
+        Convert the incoming boiler state into a model-ready DataFrame.
+        """
 
-        return self.feature_builder.build(sensor_data)
+        processed = {}
+
+        for feature in self.features:
+
+            processed[feature] = state.get(
+                feature,
+                0,
+            )
+
+        return pd.DataFrame(
+            [processed],
+            columns=self.features,
+        )
+
+    # -------------------------------------------------
+    # Prediction
+    # -------------------------------------------------
 
     def predict(
         self,
-        processed_data: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        processed_state: pd.DataFrame,
+    ) -> float:
+        """
+        Predict the next boiler target value.
+        """
 
-        temperature = processed_data.get(
-            "temperature",
-            processed_data.get("temperature_avg", 150),
+        prediction = self.manager.predict(
+            self.model_name,
+            processed_state,
         )
 
-        pressure = processed_data.get(
-            "pressure",
-            processed_data.get("pressure_avg", 8),
-        )
+        return float(prediction[0])
 
-        steam_flow = processed_data.get(
-            "steam_flow",
-            processed_data.get("steam_flow_avg", 100),
-        )
-
-        fuel_consumption = processed_data.get(
-            "fuel_consumption",
-            processed_data.get("fuel_consumption_avg", 50),
-        )
-
-        predicted_temperature = temperature + 0.30
-        predicted_pressure = pressure + 0.15
-        predicted_steam_flow = steam_flow + 2.0
-        predicted_fuel_consumption = fuel_consumption * 1.02
-
-        efficiency = max(
-            0,
-            100 - (predicted_fuel_consumption / 5),
-        )
-
-        return {
-            "predicted_temperature": predicted_temperature,
-            "predicted_pressure": predicted_pressure,
-            "predicted_steam_flow": predicted_steam_flow,
-            "predicted_fuel_consumption": predicted_fuel_consumption,
-            "predicted_efficiency": efficiency,
-        }
+    # -------------------------------------------------
+    # Post Processing
+    # -------------------------------------------------
 
     def postprocess(
         self,
-        prediction: Dict[str, Any],
+        prediction: float,
+    ) -> Dict[str, float]:
+        """
+        Convert prediction into the standard forecast format.
+        """
+
+        return {
+            self.target: round(prediction, 2),
+        }
+
+    # -------------------------------------------------
+    # Forecast
+    # -------------------------------------------------
+
+    def forecast(
+        self,
+        state: Dict[str, Any],
+    ) -> Dict[str, float]:
+        """
+        Generate a boiler forecast from the current state.
+        """
+
+        processed_state = self.preprocess(
+            state,
+        )
+
+        prediction = self.predict(
+            processed_state,
+        )
+
+        return self.postprocess(
+            prediction,
+        )
+
+    # -------------------------------------------------
+    # Model Information
+    # -------------------------------------------------
+
+    def model_info(
+        self,
     ) -> Dict[str, Any]:
+        """
+        Return metadata about the forecasting model.
+        """
 
-        result = round_values(prediction)
-
-        result["prediction_horizon"] = self.prediction_horizon
-        result["timestamp"] = current_timestamp()
-
-        return result
+        return {
+            "module": "boiler",
+            "model": self.model_name,
+            "target": self.target,
+            "features": self.features,
+            "prediction_horizon": self.prediction_horizon,
+        }

@@ -1,86 +1,170 @@
+"""
+HVAC Forecasting Module.
+"""
+
 from __future__ import annotations
 
 from typing import Any, Dict
 
-from common.feature_builder import FeatureBuilder
+import pandas as pd
+
+from common.config import MODULE_CONFIG
 from common.forecasting_base import ForecastingBase
-from common.utils import current_timestamp, round_values
+from common.model_manager import ModelManager
 
 
 class HVACForecast(ForecastingBase):
     """
-    Forecast future HVAC operating conditions.
+    Forecast HVAC power consumption using the trained Random Forest model.
     """
 
-    def __init__(self, prediction_horizon: int = 60):
+    def __init__(self) -> None:
+
+        config = MODULE_CONFIG["hvac"]
 
         super().__init__(
-            model_name="HVAC Forecast",
-            prediction_horizon=prediction_horizon,
+            model_name=config["model"],
+            prediction_horizon=1,
         )
 
-        self.feature_builder = FeatureBuilder()
+        self.config = config
 
-    # ---------------------------------------------------------
+        self.features = config["features"]
+
+        self.target = config["target"]
+
+        self.encoders = config["encoders"]
+
+        self.manager = ModelManager()
+
+        if not self.manager.load_model(self.model_name):
+            raise FileNotFoundError(
+                f"Model '{self.model_name}' not found."
+            )
+
+        for _, encoder_name in self.encoders.items():
+
+            self.manager.load_encoder(
+                encoder_name,
+            )
+
+    # -------------------------------------------------
+    # Preprocessing
+    # -------------------------------------------------
 
     def preprocess(
         self,
-        sensor_data: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        state: Dict[str, Any],
+    ) -> pd.DataFrame:
+        """
+        Convert the incoming HVAC state into a model-ready DataFrame.
+        """
 
-        return self.feature_builder.build(sensor_data)
+        processed = {}
 
-    # ---------------------------------------------------------
+        for feature in self.features:
+
+            value = state.get(feature, 0)
+
+            if value is None:
+                value = 0
+
+            if feature in self.encoders:
+
+                encoder = self.manager.encoders[
+                    self.encoders[feature]
+                ]
+
+                value = encoder.transform(
+                    [value]
+                )[0]
+
+            processed[feature] = value
+
+        return pd.DataFrame(
+            [processed],
+            columns=self.features,
+        )
+
+    # -------------------------------------------------
+    # Prediction
+    # -------------------------------------------------
 
     def predict(
         self,
-        processed_data: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        processed_state: pd.DataFrame,
+    ) -> float:
+        """
+        Predict the next HVAC target value.
+        """
 
-        temperature = processed_data.get(
-            "temperature",
-            processed_data.get("temperature_avg", 25),
+        prediction = self.manager.predict(
+            self.model_name,
+            processed_state,
         )
 
-        humidity = processed_data.get(
-            "humidity",
-            processed_data.get("humidity_avg", 50),
+        return float(
+            prediction[0]
         )
 
-        power = processed_data.get(
-            "power",
-            processed_data.get("power_avg", 0),
-        )
-
-        predicted_temperature = temperature + 0.15
-
-        predicted_humidity = humidity - 0.25
-
-        predicted_power = power * 1.03
-
-        efficiency = max(
-            0,
-            100 - (predicted_power / 20),
-        )
-
-        return {
-            "predicted_temperature": predicted_temperature,
-            "predicted_humidity": predicted_humidity,
-            "predicted_power": predicted_power,
-            "predicted_efficiency": efficiency,
-        }
-
-    # ---------------------------------------------------------
+    # -------------------------------------------------
+    # Post Processing
+    # -------------------------------------------------
 
     def postprocess(
         self,
-        prediction: Dict[str, Any],
+        prediction: float,
     ) -> Dict[str, Any]:
+        """
+        Convert prediction into the standard forecast format.
+        """
 
-        result = round_values(prediction)
+        return {
+            "hvac_power_kw": round(
+                prediction,
+                2,
+            )
+        }
+    
+    # -------------------------------------------------
+    # Forecast
+    # -------------------------------------------------
 
-        result["prediction_horizon"] = self.prediction_horizon
+    def forecast(
+        self,
+        state: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        """
+        Generate an HVAC forecast from the current state.
+        """
 
-        result["timestamp"] = current_timestamp()
+        processed_state = self.preprocess(
+            state,
+        )
 
-        return result
+        prediction = self.predict(
+            processed_state,
+        )
+
+        return self.postprocess(
+            prediction,
+        )
+
+    # -------------------------------------------------
+    # Model Information
+    # -------------------------------------------------
+
+    def model_info(
+        self,
+    ) -> Dict[str, Any]:
+        """
+        Return metadata about the forecasting model.
+        """
+
+        return {
+            "module": "hvac",
+            "model": self.model_name,
+            "target": self.target,
+            "features": self.features,
+            "prediction_horizon": self.prediction_horizon,
+        }

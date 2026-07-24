@@ -1,119 +1,182 @@
 """
-Evaluation metrics for AI forecasting models.
+Evaluation metrics for AI Forecasting models.
 """
 
 from __future__ import annotations
 
-from math import sqrt
-from typing import List
+from typing import Any, Dict
+
+import numpy as np
+from numpy.typing import ArrayLike
+from sklearn.metrics import (
+    explained_variance_score,
+    max_error,
+    mean_absolute_error,
+    mean_absolute_percentage_error,
+    mean_squared_error,
+    r2_score,
+)
 
 
 class ForecastMetrics:
     """
-    Provides common regression metrics for forecasting models.
+    Computes regression metrics for forecasting models.
     """
 
-    @staticmethod
-    def mae(actual: List[float], predicted: List[float]) -> float:
-        """
-        Mean Absolute Error
-        """
+    def __init__(
+        self,
+        y_true: ArrayLike,
+        y_pred: ArrayLike,
+    ) -> None:
 
-        if len(actual) != len(predicted):
-            raise ValueError("Length mismatch.")
+        self.y_true = np.asarray(y_true)
+        self.y_pred = np.asarray(y_pred)
 
-        if len(actual) == 0:
-            return 0.0
+        self._summary_cache: Dict[str, float] | None = None
 
-        error = sum(abs(a - p) for a, p in zip(actual, predicted))
+        self._validate()
 
-        return error / len(actual)
+    # =====================================================
+    # Validation
+    # =====================================================
 
-    # ---------------------------------------------------------
+    def _validate(self) -> None:
 
-    @staticmethod
-    def mse(actual: List[float], predicted: List[float]) -> float:
-        """
-        Mean Squared Error
-        """
+        if self.y_true.size == 0:
+            raise ValueError("y_true cannot be empty.")
 
-        if len(actual) != len(predicted):
-            raise ValueError("Length mismatch.")
+        if self.y_pred.size == 0:
+            raise ValueError("y_pred cannot be empty.")
 
-        if len(actual) == 0:
-            return 0.0
+        if self.y_true.shape != self.y_pred.shape:
+            raise ValueError(
+                "y_true and y_pred must have the same shape."
+            )
 
-        error = sum((a - p) ** 2 for a, p in zip(actual, predicted))
+    # =====================================================
+    # Individual Metrics
+    # =====================================================
 
-        return error / len(actual)
+    def mae(self) -> float:
 
-    # ---------------------------------------------------------
-
-    @staticmethod
-    def rmse(actual: List[float], predicted: List[float]) -> float:
-        """
-        Root Mean Squared Error
-        """
-
-        return sqrt(
-            ForecastMetrics.mse(actual, predicted)
+        return float(
+            mean_absolute_error(
+                self.y_true,
+                self.y_pred,
+            )
         )
 
-    # ---------------------------------------------------------
+    def mse(self) -> float:
 
-    @staticmethod
-    def mape(actual: List[float], predicted: List[float]) -> float:
-        """
-        Mean Absolute Percentage Error
-        """
-
-        if len(actual) != len(predicted):
-            raise ValueError("Length mismatch.")
-
-        values = []
-
-        for a, p in zip(actual, predicted):
-
-            if a != 0:
-                values.append(abs((a - p) / a))
-
-        if not values:
-            return 0.0
-
-        return (sum(values) / len(values)) * 100
-
-    # ---------------------------------------------------------
-
-    @staticmethod
-    def accuracy(actual: List[float], predicted: List[float]) -> float:
-        """
-        Forecast Accuracy (%)
-        """
-
-        return max(
-            0.0,
-            100 - ForecastMetrics.mape(actual, predicted)
+        return float(
+            mean_squared_error(
+                self.y_true,
+                self.y_pred,
+            )
         )
 
-    # ---------------------------------------------------------
+    def rmse(self) -> float:
 
-    @staticmethod
-    def summary(actual: List[float], predicted: List[float]):
+        return float(np.sqrt(self.mse()))
 
-        return {
-            "MAE": round(
-                ForecastMetrics.mae(actual, predicted), 4
-            ),
-            "MSE": round(
-                ForecastMetrics.mse(actual, predicted), 4
-            ),
-            "RMSE": round(
-                ForecastMetrics.rmse(actual, predicted), 4
-            ),
-            "MAPE": round(
-                ForecastMetrics.mape(actual, predicted), 2
-            ),
-            "Accuracy": round(
-                ForecastMetrics.accuracy(actual, predicted), 2
-            ),
-        }
+    def mape(self) -> float:
+
+        return float(
+            mean_absolute_percentage_error(
+                self.y_true,
+                self.y_pred,
+            )
+            * 100
+        )
+
+    def r2(self) -> float:
+
+        return float(
+            r2_score(
+                self.y_true,
+                self.y_pred,
+            )
+        )
+
+    def explained_variance(self) -> float:
+
+        return float(
+            explained_variance_score(
+                self.y_true,
+                self.y_pred,
+            )
+        )
+
+    def maximum_error(self) -> float:
+
+        return float(
+            max_error(
+                self.y_true,
+                self.y_pred,
+            )
+        )
+
+    # =====================================================
+    # Summary
+    # =====================================================
+
+    def summary(self) -> Dict[str, float]:
+
+        if self._summary_cache is None:
+
+            self._summary_cache = {
+
+                "MAE": self.mae(),
+
+                "MSE": self.mse(),
+
+                "RMSE": self.rmse(),
+
+                "MAPE": self.mape(),
+
+                "R2": self.r2(),
+
+                "Explained Variance":
+                    self.explained_variance(),
+
+                "Max Error":
+                    self.maximum_error(),
+            }
+
+        return self._summary_cache
+
+    # =====================================================
+    # Pretty Print
+    # =====================================================
+
+    def print_summary(self) -> None:
+
+        print("\nForecast Evaluation")
+        print("-" * 35)
+
+        for metric, value in self.summary().items():
+
+            print(
+                f"{metric:<22}: {value:.4f}"
+            )
+
+    # =====================================================
+    # Magic Methods
+    # =====================================================
+
+    def __str__(
+        self,
+    ) -> str:
+
+        return str(
+            self.summary()
+        )
+
+    def __repr__(
+        self,
+    ) -> str:
+
+        return (
+            f"ForecastMetrics("
+            f"{self.summary()})"
+        )
