@@ -603,7 +603,3 @@ Ensure the following are installed before setting up the project:
 git clone <repository-url>
 cd DigitalTwin
 
-# Authors
-**Kopal Sachan**  
-**Udit Mittal**  
-**Aryan Pundir**
