@@ -1,0 +1,562 @@
+{
+  "generated_at": "2026-08-21T03:25:23.399155+00:00",
+  "model_count": 7,
+  "retraining_required_count": 6,
+  "models": {
+    "production": {
+      "model": "production_rf",
+      "checked_at": "2026-08-21T03:25:17.322081+00:00",
+      "status": "healthy",
+      "retraining_required": false,
+      "reasons": [],
+      "metric_changes": {
+        "mae_relative_change": 0.0,
+        "rmse_relative_change": 0.0,
+        "r2_absolute_drop": 0.0
+      },
+      "reference_metrics": {
+        "sample_count": 39.0,
+        "mae": 7.96397692,
+        "mse": 112.46932726,
+        "rmse": 10.60515569,
+        "mape_percent": 12.7730712,
+        "smape_percent": 12.74784227,
+        "wape_percent": 12.76351779,
+        "r2": 0.66313431,
+        "bias": -0.55983333,
+        "max_error": 27.946
+      },
+      "current_metrics": {
+        "sample_count": 39.0,
+        "mae": 7.96397692,
+        "mse": 112.46932726,
+        "rmse": 10.60515569,
+        "mape_percent": 12.7730712,
+        "smape_percent": 12.74784227,
+        "wape_percent": 12.76351779,
+        "r2": 0.66313431,
+        "bias": -0.55983333,
+        "max_error": 27.946
+      },
+      "reference_source": "initial_week7_baseline",
+      "feature_drift": {
+        "status": "stable",
+        "drift_detected": false,
+        "drifted_features": [],
+        "features": [
+          {
+            "feature": "machine_load_kw",
+            "reference_mean": 69.31850746,
+            "current_mean": 80.01396552,
+            "standardized_mean_shift": 0.46240073,
+            "drift_detected": false
+          },
+          {
+            "feature": "motor_temperature_c",
+            "reference_mean": 48.16470149,
+            "current_mean": 49.26155172,
+            "standardized_mean_shift": 0.50221898,
+            "drift_detected": false
+          },
+          {
+            "feature": "vibration_mm_s",
+            "reference_mean": 1.38969403,
+            "current_mean": 1.59734483,
+            "standardized_mean_shift": 0.34149534,
+            "drift_detected": false
+          },
+          {
+            "feature": "status",
+            "reference_mean": 0.0,
+            "current_mean": 0.0,
+            "standardized_mean_shift": 0.0,
+            "drift_detected": false
+          }
+        ]
+      }
+    },
+    "boiler": {
+      "model": "boiler_rf",
+      "checked_at": "2026-08-21T03:25:17.795346+00:00",
+      "status": "degraded",
+      "retraining_required": true,
+      "reasons": [
+        "r2=-0.4474 is below the minimum quality threshold 0.5000"
+      ],
+      "metric_changes": {
+        "mae_relative_change": 0.0,
+        "rmse_relative_change": 0.0,
+        "r2_absolute_drop": 0.0
+      },
+      "reference_metrics": {
+        "sample_count": 20.0,
+        "mae": 3.20453,
+        "mse": 16.22070553,
+        "rmse": 4.0274937,
+        "mape_percent": 2.20033346,
+        "smape_percent": 2.22462185,
+        "wape_percent": 2.22124179,
+        "r2": -0.44736767,
+        "bias": -1.314795,
+        "max_error": 8.1943
+      },
+      "current_metrics": {
+        "sample_count": 20.0,
+        "mae": 3.20453,
+        "mse": 16.22070553,
+        "rmse": 4.0274937,
+        "mape_percent": 2.20033346,
+        "smape_percent": 2.22462185,
+        "wape_percent": 2.22124179,
+        "r2": -0.44736767,
+        "bias": -1.314795,
+        "max_error": 8.1943
+      },
+      "reference_source": "initial_week7_baseline",
+      "feature_drift": {
+        "status": "stable",
+        "drift_detected": false,
+        "drifted_features": [],
+        "features": [
+          {
+            "feature": "steam_pressure_bar",
+            "reference_mean": 8.98522388,
+            "current_mean": 9.09103448,
+            "standardized_mean_shift": 0.34377943,
+            "drift_detected": false
+          },
+          {
+            "feature": "feedwater_temperature_c",
+            "reference_mean": 86.2680597,
+            "current_mean": 84.45965517,
+            "standardized_mean_shift": 0.44158497,
+            "drift_detected": false
+          },
+          {
+            "feature": "flue_gas_temperature_c",
+            "reference_mean": 191.1761194,
+            "current_mean": 188.99517241,
+            "standardized_mean_shift": 0.1469196,
+            "drift_detected": false
+          },
+          {
+            "feature": "efficiency_percent",
+            "reference_mean": 82.52850746,
+            "current_mean": 81.98724138,
+            "standardized_mean_shift": 0.22662187,
+            "drift_detected": false
+          }
+        ]
+      }
+    },
+    "compressor": {
+      "model": "compressor_rf",
+      "checked_at": "2026-08-21T03:25:18.353911+00:00",
+      "status": "degraded",
+      "retraining_required": true,
+      "reasons": [
+        "feature drift detected: air_pressure_bar, vibration_mm_s"
+      ],
+      "metric_changes": {
+        "mae_relative_change": 0.0,
+        "rmse_relative_change": 0.0,
+        "r2_absolute_drop": 0.0
+      },
+      "reference_metrics": {
+        "sample_count": 20.0,
+        "mae": 4.44479,
+        "mse": 24.71311002,
+        "rmse": 4.97122822,
+        "mape_percent": 16.6847054,
+        "smape_percent": 15.67991477,
+        "wape_percent": 15.22058043,
+        "r2": 0.75631367,
+        "bias": 2.07091,
+        "max_error": 8.86595
+      },
+      "current_metrics": {
+        "sample_count": 20.0,
+        "mae": 4.44479,
+        "mse": 24.71311002,
+        "rmse": 4.97122822,
+        "mape_percent": 16.6847054,
+        "smape_percent": 15.67991477,
+        "wape_percent": 15.22058043,
+        "r2": 0.75631367,
+        "bias": 2.07091,
+        "max_error": 8.86595
+      },
+      "reference_source": "initial_week7_baseline",
+      "feature_drift": {
+        "status": "drift_detected",
+        "drift_detected": true,
+        "drifted_features": [
+          "air_pressure_bar",
+          "vibration_mm_s"
+        ],
+        "features": [
+          {
+            "feature": "air_pressure_bar",
+            "reference_mean": 5.36597015,
+            "current_mean": 3.81724138,
+            "standardized_mean_shift": 0.88175254,
+            "drift_detected": true
+          },
+          {
+            "feature": "motor_temperature_c",
+            "reference_mean": 49.35761194,
+            "current_mean": 46.86827586,
+            "standardized_mean_shift": 0.65890018,
+            "drift_detected": false
+          },
+          {
+            "feature": "vibration_mm_s",
+            "reference_mean": 1.3961791,
+            "current_mean": 0.9042069,
+            "standardized_mean_shift": 0.77316176,
+            "drift_detected": true
+          },
+          {
+            "feature": "efficiency_percent",
+            "reference_mean": 90.93955224,
+            "current_mean": 92.7037931,
+            "standardized_mean_shift": 0.48701499,
+            "drift_detected": false
+          },
+          {
+            "feature": "status",
+            "reference_mean": 0.98507463,
+            "current_mean": 0.89655172,
+            "standardized_mean_shift": 0.73005988,
+            "drift_detected": false
+          }
+        ]
+      }
+    },
+    "hvac": {
+      "model": "hvac_rf",
+      "checked_at": "2026-08-21T03:25:19.347051+00:00",
+      "status": "degraded",
+      "retraining_required": true,
+      "reasons": [
+        "r2=0.3119 is below the minimum quality threshold 0.5000",
+        "feature drift detected: airflow_m3_min"
+      ],
+      "metric_changes": {
+        "mae_relative_change": 0.0,
+        "rmse_relative_change": 0.0,
+        "r2_absolute_drop": 0.0
+      },
+      "reference_metrics": {
+        "sample_count": 20.0,
+        "mae": 2.2510325,
+        "mse": 9.30028394,
+        "rmse": 3.04963669,
+        "mape_percent": 22.14707778,
+        "smape_percent": 21.41920027,
+        "wape_percent": 20.28596855,
+        "r2": 0.31186806,
+        "bias": -0.2013075,
+        "max_error": 7.3249
+      },
+      "current_metrics": {
+        "sample_count": 20.0,
+        "mae": 2.2510325,
+        "mse": 9.30028394,
+        "rmse": 3.04963669,
+        "mape_percent": 22.14707778,
+        "smape_percent": 21.41920027,
+        "wape_percent": 20.28596855,
+        "r2": 0.31186806,
+        "bias": -0.2013075,
+        "max_error": 7.3249
+      },
+      "reference_source": "initial_week7_baseline",
+      "feature_drift": {
+        "status": "drift_detected",
+        "drift_detected": true,
+        "drifted_features": [
+          "airflow_m3_min"
+        ],
+        "features": [
+          {
+            "feature": "temperature_c",
+            "reference_mean": 23.49701493,
+            "current_mean": 24.15793103,
+            "standardized_mean_shift": 0.25132957,
+            "drift_detected": false
+          },
+          {
+            "feature": "airflow_m3_min",
+            "reference_mean": 939.81447761,
+            "current_mean": 635.78586207,
+            "standardized_mean_shift": 0.8021078,
+            "drift_detected": true
+          },
+          {
+            "feature": "humidity_percent",
+            "reference_mean": 51.7058209,
+            "current_mean": 52.07655172,
+            "standardized_mean_shift": 0.04855986,
+            "drift_detected": false
+          },
+          {
+            "feature": "setpoint_temperature_c",
+            "reference_mean": 22.86567164,
+            "current_mean": 23.10344828,
+            "standardized_mean_shift": 0.28761816,
+            "drift_detected": false
+          },
+          {
+            "feature": "efficiency_percent",
+            "reference_mean": 91.22149254,
+            "current_mean": 90.81758621,
+            "standardized_mean_shift": 0.11496642,
+            "drift_detected": false
+          },
+          {
+            "feature": "status",
+            "reference_mean": 0.98507463,
+            "current_mean": 1.0,
+            "standardized_mean_shift": 0.12309149,
+            "drift_detected": false
+          }
+        ]
+      }
+    },
+    "battery": {
+      "model": "battery_rf",
+      "checked_at": "2026-08-21T03:25:21.133337+00:00",
+      "status": "degraded",
+      "retraining_required": true,
+      "reasons": [
+        "feature drift detected: state_of_charge_percent"
+      ],
+      "metric_changes": {
+        "mae_relative_change": 0.0,
+        "rmse_relative_change": 0.0,
+        "r2_absolute_drop": 0.0
+      },
+      "reference_metrics": {
+        "sample_count": 20.0,
+        "mae": 1.339415,
+        "mse": 2.59091641,
+        "rmse": 1.60963238,
+        "mape_percent": 8.32252199,
+        "smape_percent": 7.02497869,
+        "wape_percent": 2.69570511,
+        "r2": 0.99916863,
+        "bias": 0.50177,
+        "max_error": 3.3037
+      },
+      "current_metrics": {
+        "sample_count": 20.0,
+        "mae": 1.339415,
+        "mse": 2.59091641,
+        "rmse": 1.60963238,
+        "mape_percent": 8.32252199,
+        "smape_percent": 7.02497869,
+        "wape_percent": 2.69570511,
+        "r2": 0.99916863,
+        "bias": 0.50177,
+        "max_error": 3.3037
+      },
+      "reference_source": "initial_week7_baseline",
+      "feature_drift": {
+        "status": "drift_detected",
+        "drift_detected": true,
+        "drifted_features": [
+          "state_of_charge_percent"
+        ],
+        "features": [
+          {
+            "feature": "voltage_v",
+            "reference_mean": 690.27701493,
+            "current_mean": 691.38896552,
+            "standardized_mean_shift": 0.24688452,
+            "drift_detected": false
+          },
+          {
+            "feature": "current_a",
+            "reference_mean": 17.26940299,
+            "current_mean": -7.78758621,
+            "standardized_mean_shift": 0.33666678,
+            "drift_detected": false
+          },
+          {
+            "feature": "temperature_c",
+            "reference_mean": 31.58865672,
+            "current_mean": 31.14275862,
+            "standardized_mean_shift": 0.32207102,
+            "drift_detected": false
+          },
+          {
+            "feature": "mode",
+            "reference_mean": 0.37313433,
+            "current_mean": 0.55172414,
+            "standardized_mean_shift": 0.36926388,
+            "drift_detected": false
+          },
+          {
+            "feature": "state_of_charge_percent",
+            "reference_mean": 67.14,
+            "current_mean": 70.67482759,
+            "standardized_mean_shift": 1.38277965,
+            "drift_detected": true
+          }
+        ]
+      }
+    },
+    "grid": {
+      "model": "grid_rf",
+      "checked_at": "2026-08-21T03:25:22.093790+00:00",
+      "status": "degraded",
+      "retraining_required": true,
+      "reasons": [
+        "r2=0.0534 is below the minimum quality threshold 0.5000"
+      ],
+      "metric_changes": {
+        "mae_relative_change": 0.0,
+        "rmse_relative_change": 0.0,
+        "r2_absolute_drop": 0.0
+      },
+      "reference_metrics": {
+        "sample_count": 20.0,
+        "mae": 55.1828,
+        "mse": 4639.32602373,
+        "rmse": 68.11259813,
+        "mape_percent": 15.81062613,
+        "smape_percent": 14.56197737,
+        "wape_percent": 14.72973063,
+        "r2": 0.05340009,
+        "bias": 23.05071,
+        "max_error": 141.9058
+      },
+      "current_metrics": {
+        "sample_count": 20.0,
+        "mae": 55.1828,
+        "mse": 4639.32602373,
+        "rmse": 68.11259813,
+        "mape_percent": 15.81062613,
+        "smape_percent": 14.56197737,
+        "wape_percent": 14.72973063,
+        "r2": 0.05340009,
+        "bias": 23.05071,
+        "max_error": 141.9058
+      },
+      "reference_source": "initial_week7_baseline",
+      "feature_drift": {
+        "status": "stable",
+        "drift_detected": false,
+        "drifted_features": [],
+        "features": [
+          {
+            "feature": "grid_export_kw",
+            "reference_mean": 6.64059701,
+            "current_mean": 2.40448276,
+            "standardized_mean_shift": 0.52458929,
+            "drift_detected": false
+          },
+          {
+            "feature": "frequency_hz",
+            "reference_mean": 49.95947761,
+            "current_mean": 49.96472414,
+            "standardized_mean_shift": 0.07865393,
+            "drift_detected": false
+          },
+          {
+            "feature": "voltage_v",
+            "reference_mean": 416.03626866,
+            "current_mean": 416.65689655,
+            "standardized_mean_shift": 0.15175534,
+            "drift_detected": false
+          },
+          {
+            "feature": "power_factor",
+            "reference_mean": 0.93380597,
+            "current_mean": 0.94793103,
+            "standardized_mean_shift": 0.43451383,
+            "drift_detected": false
+          },
+          {
+            "feature": "tariff_inr_kwh",
+            "reference_mean": 7.76716418,
+            "current_mean": 7.52758621,
+            "standardized_mean_shift": 0.22878939,
+            "drift_detected": false
+          }
+        ]
+      }
+    },
+    "solar": {
+      "model": "solar_rf",
+      "checked_at": "2026-08-21T03:25:23.083545+00:00",
+      "status": "degraded",
+      "retraining_required": true,
+      "reasons": [
+        "feature drift detected: irradiance_w_m2, panel_temperature_c"
+      ],
+      "metric_changes": {
+        "mae_relative_change": 0.0,
+        "rmse_relative_change": 0.0,
+        "r2_absolute_drop": 0.0
+      },
+      "reference_metrics": {
+        "sample_count": 20.0,
+        "mae": 7.83791,
+        "mse": 89.14941469,
+        "rmse": 9.44189677,
+        "mape_percent": 12.59658806,
+        "smape_percent": 23.94020667,
+        "wape_percent": 4.93167432,
+        "r2": 0.99345024,
+        "bias": 4.693945,
+        "max_error": 20.60805
+      },
+      "current_metrics": {
+        "sample_count": 20.0,
+        "mae": 7.83791,
+        "mse": 89.14941469,
+        "rmse": 9.44189677,
+        "mape_percent": 12.59658806,
+        "smape_percent": 23.94020667,
+        "wape_percent": 4.93167432,
+        "r2": 0.99345024,
+        "bias": 4.693945,
+        "max_error": 20.60805
+      },
+      "reference_source": "initial_week7_baseline",
+      "feature_drift": {
+        "status": "drift_detected",
+        "drift_detected": true,
+        "drifted_features": [
+          "irradiance_w_m2",
+          "panel_temperature_c"
+        ],
+        "features": [
+          {
+            "feature": "irradiance_w_m2",
+            "reference_mean": 573.74701493,
+            "current_mean": 241.50241379,
+            "standardized_mean_shift": 0.99359262,
+            "drift_detected": true
+          },
+          {
+            "feature": "panel_temperature_c",
+            "reference_mean": 41.05880597,
+            "current_mean": 34.04413793,
+            "standardized_mean_shift": 0.90419615,
+            "drift_detected": true
+          },
+          {
+            "feature": "inverter_status",
+            "reference_mean": 0.08955224,
+            "current_mean": 0.20689655,
+            "standardized_mean_shift": 0.41095693,
+            "drift_detected": false
+          }
+        ]
+      }
+    }
+  }
+}
