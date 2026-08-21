@@ -1,219 +1,28 @@
 {
-  "generated_at": "2026-08-21T03:25:23.399160+00:00",
-  "safety_policy": "candidate models are never promoted without an explicit promotion_path",
-  "models": {
-    "production": {
-      "model": "production_rf",
-      "triggered": false,
-      "status": "not_required",
-      "promoted": false,
-      "current_metrics": {
-        "sample_count": 39.0,
-        "mae": 7.96397692,
-        "mse": 112.46932726,
-        "rmse": 10.60515569,
-        "mape_percent": 12.7730712,
-        "smape_percent": 12.74784227,
-        "wape_percent": 12.76351779,
-        "r2": 0.66313431,
-        "bias": -0.55983333,
-        "max_error": 27.946
-      },
-      "candidate_metrics": null,
-      "rmse_improvement_percent": 0.0,
-      "promotion_path": null
-    },
-    "boiler": {
-      "model": "boiler_rf",
-      "triggered": true,
-      "status": "candidate_rejected",
-      "promoted": false,
-      "current_metrics": {
-        "sample_count": 20.0,
-        "mae": 3.20453,
-        "mse": 16.22070553,
-        "rmse": 4.0274937,
-        "mape_percent": 2.20033346,
-        "smape_percent": 2.22462185,
-        "wape_percent": 2.22124179,
-        "r2": -0.44736767,
-        "bias": -1.314795,
-        "max_error": 8.1943
-      },
-      "candidate_metrics": {
-        "sample_count": 20.0,
-        "mae": 3.2052075,
-        "mse": 16.23062096,
-        "rmse": 4.02872448,
-        "mape_percent": 2.20079928,
-        "smape_percent": 2.22510583,
-        "wape_percent": 2.2217114,
-        "r2": -0.44825242,
-        "bias": -1.3150475,
-        "max_error": 8.2036
-      },
-      "rmse_improvement_percent": -0.0306,
-      "promotion_path": null
-    },
-    "compressor": {
-      "model": "compressor_rf",
-      "triggered": true,
-      "status": "candidate_rejected",
-      "promoted": false,
-      "current_metrics": {
-        "sample_count": 20.0,
-        "mae": 4.44479,
-        "mse": 24.71311002,
-        "rmse": 4.97122822,
-        "mape_percent": 16.6847054,
-        "smape_percent": 15.67991477,
-        "wape_percent": 15.22058043,
-        "r2": 0.75631367,
-        "bias": 2.07091,
-        "max_error": 8.86595
-      },
-      "candidate_metrics": {
-        "sample_count": 20.0,
-        "mae": 4.44944,
-        "mse": 24.76139813,
-        "rmse": 4.97608261,
-        "mape_percent": 16.70212534,
-        "smape_percent": 15.69360878,
-        "wape_percent": 15.23650372,
-        "r2": 0.75583752,
-        "bias": 2.07588,
-        "max_error": 8.85985
-      },
-      "rmse_improvement_percent": -0.0976,
-      "promotion_path": null
-    },
-    "hvac": {
-      "model": "hvac_rf",
-      "triggered": true,
-      "status": "candidate_rejected",
-      "promoted": false,
-      "current_metrics": {
-        "sample_count": 20.0,
-        "mae": 2.2510325,
-        "mse": 9.30028394,
-        "rmse": 3.04963669,
-        "mape_percent": 22.14707778,
-        "smape_percent": 21.41920027,
-        "wape_percent": 20.28596855,
-        "r2": 0.31186806,
-        "bias": -0.2013075,
-        "max_error": 7.3249
-      },
-      "candidate_metrics": {
-        "sample_count": 20.0,
-        "mae": 2.2459175,
-        "mse": 9.30304788,
-        "rmse": 3.05008981,
-        "mape_percent": 22.0782815,
-        "smape_percent": 21.35658701,
-        "wape_percent": 20.23987293,
-        "r2": 0.31166356,
-        "bias": -0.2013675,
-        "max_error": 7.31005
-      },
-      "rmse_improvement_percent": -0.0149,
-      "promotion_path": null
-    },
-    "battery": {
-      "model": "battery_rf",
-      "triggered": true,
-      "status": "candidate_rejected",
-      "promoted": false,
-      "current_metrics": {
-        "sample_count": 20.0,
-        "mae": 1.339415,
-        "mse": 2.59091641,
-        "rmse": 1.60963238,
-        "mape_percent": 8.32252199,
-        "smape_percent": 7.02497869,
-        "wape_percent": 2.69570511,
-        "r2": 0.99916863,
-        "bias": 0.50177,
-        "max_error": 3.3037
-      },
-      "candidate_metrics": {
-        "sample_count": 20.0,
-        "mae": 1.3385225,
-        "mse": 2.58362306,
-        "rmse": 1.60736525,
-        "mape_percent": 8.18793117,
-        "smape_percent": 6.94724454,
-        "wape_percent": 2.69390887,
-        "r2": 0.99917097,
-        "bias": 0.5064175,
-        "max_error": 3.3008
-      },
-      "rmse_improvement_percent": 0.1408,
-      "promotion_path": null
-    },
-    "grid": {
-      "model": "grid_rf",
-      "triggered": true,
-      "status": "candidate_rejected",
-      "promoted": false,
-      "current_metrics": {
-        "sample_count": 20.0,
-        "mae": 55.1828,
-        "mse": 4639.32602373,
-        "rmse": 68.11259813,
-        "mape_percent": 15.81062613,
-        "smape_percent": 14.56197737,
-        "wape_percent": 14.72973063,
-        "r2": 0.05340009,
-        "bias": 23.05071,
-        "max_error": 141.9058
-      },
-      "candidate_metrics": {
-        "sample_count": 20.0,
-        "mae": 55.23636,
-        "mse": 4671.35270214,
-        "rmse": 68.34729477,
-        "mape_percent": 15.83489897,
-        "smape_percent": 14.57501434,
-        "wape_percent": 14.74402719,
-        "r2": 0.04686542,
-        "bias": 23.243425,
-        "max_error": 142.33955
-      },
-      "rmse_improvement_percent": -0.3446,
-      "promotion_path": null
-    },
-    "solar": {
-      "model": "solar_rf",
-      "triggered": true,
-      "status": "candidate_rejected",
-      "promoted": false,
-      "current_metrics": {
-        "sample_count": 20.0,
-        "mae": 7.83791,
-        "mse": 89.14941469,
-        "rmse": 9.44189677,
-        "mape_percent": 12.59658806,
-        "smape_percent": 23.94020667,
-        "wape_percent": 4.93167432,
-        "r2": 0.99345024,
-        "bias": 4.693945,
-        "max_error": 20.60805
-      },
-      "candidate_metrics": {
-        "sample_count": 20.0,
-        "mae": 7.9128725,
-        "mse": 91.05744776,
-        "rmse": 9.54240262,
-        "mape_percent": 12.52524275,
-        "smape_percent": 23.70139116,
-        "wape_percent": 4.97884131,
-        "r2": 0.99331006,
-        "bias": 4.7319725,
-        "max_error": 20.626
-      },
-      "rmse_improvement_percent": -1.0645,
-      "promotion_path": null
-    }
-  }
+    "generated_at": "2026-08-21T14:43:54.572122+00:00",
+    "status": "evaluated",
+    "model_count": 1,
+    "models": [
+        {
+            "model": "module3_forecast_pipeline",
+            "triggered": false,
+            "status": "not_required",
+            "promoted": false,
+            "current_metrics": {
+                "sample_count": 1.0,
+                "mae": 0.0,
+                "mse": 0.0,
+                "rmse": 0.0,
+                "mape_percent": 0.0,
+                "smape_percent": 0.0,
+                "wape_percent": 0.0,
+                "r2": 1.0,
+                "bias": 0.0,
+                "max_error": 0.0
+            },
+            "candidate_metrics": null,
+            "rmse_improvement_percent": 0.0,
+            "promotion_path": null
+        }
+    ]
 }
