@@ -1,605 +1,1215 @@
 # Generative Digital Twin for Real-Time Energy Management and Autonomous Load Optimization
 
-> An intelligent Digital Twin platform for predictive energy management, autonomous load optimization, anomaly detection, and explainable AI-driven decision support.
+> An AI-driven Digital Twin framework for forecasting, intelligent decision-making, generative scenario simulation, energy optimization, explainability, anomaly detection, and performance evaluation.
 
 ---
 
-## Overview
+## Table of Contents
 
-**Generative Digital Twin for Real-Time Energy Management and Autonomous Load Optimization** is an AI-enabled energy management platform designed to create a digital representation of interconnected industrial energy assets and use that representation for monitoring, forecasting, decision-making, and optimization.
+- [Project Overview](#project-overview)
+- [Key Objectives](#key-objectives)
+- [System Architecture](#system-architecture)
+- [Module Overview](#module-overview)
+- [Module 1 - Data Acquisition](#module-1---data-acquisition)
+- [Module 2 - Digital Twin](#module-2---digital-twin)
+- [Module 3 - AI Forecasting](#module-3---ai-forecasting)
+- [Module 4 - Multi-Agent Intelligence](#module-4---multi-agent-intelligence)
+- [Module 5 - Generative Scenario Simulation](#module-5---generative-scenario-simulation)
+- [Module 6 - Optimization Engine](#module-6---optimization-engine)
+- [Module 7 - Explainable AI & Performance Evaluation](#module-7---explainable-ai--performance-evaluation)
+- [End-to-End Data Flow](#end-to-end-data-flow)
+- [Technology Stack](#technology-stack)
+- [Project Structure](#project-structure)
+- [Integration and Validation](#integration-and-validation)
+- [Current End-to-End Results](#current-end-to-end-results)
+- [Running the Project](#running-the-project)
+- [Outputs](#outputs)
+- [Design Principles](#design-principles)
+- [Future Scope](#future-scope)
+- [Authors](#authors)
 
-The system combines:
+---
 
-- Digital Twin technology
-- Data acquisition and preprocessing
-- Machine Learning-based forecasting
-- Anomaly detection
-- Rule-Based Multi-Agent decision-making
-- Genetic Algorithm-based optimization
-- Explainable AI using SHAP
-- Centralized dashboard visualization
-- Cross-module integration
+## Project Overview
 
-The platform follows an end-to-end intelligent energy-management workflow:
+The project, **Generative Digital Twin for Real-Time Energy Management and Autonomous Load Optimization**, is an AI-enabled industrial energy management framework that combines Digital Twin technology with machine learning, multi-agent intelligence, scenario simulation, optimization, explainable AI, anomaly detection, and performance evaluation.
 
-**Data Acquisition → Digital Twin → Forecasting → Anomaly Detection → Decision-Making → Optimization → Explainability → Dashboard**
+The system is designed to create a digital representation of industrial energy assets and use that representation to:
 
-The objective is to move beyond passive monitoring and build a system capable of **predicting future conditions, identifying abnormal behavior, making intelligent decisions, and optimizing energy utilization**.
+- Monitor and simulate industrial equipment.
+- Forecast future operating conditions.
+- Generate intelligent equipment-level recommendations.
+- Simulate multiple operating scenarios.
+- Select the most suitable scenario.
+- Optimize operating variables using a real-valued Genetic Algorithm.
+- Explain model predictions and system behavior.
+- Detect abnormal operating conditions.
+- Monitor forecasting model performance.
+- Evaluate baseline versus optimized performance.
+- Produce structured outputs for further integration with dashboards and other applications.
+
+The complete pipeline follows:
+
+```text
+Module 1
+Data Acquisition
+        ↓
+Module 2
+Digital Twin
+        ↓
+Module 3
+AI Forecasting
+        ↓
+Module 4
+Multi-Agent Intelligence
+        ↓
+Module 5
+Generative Scenario Simulation
+        ↓
+Module 6
+Optimization Engine
+        ↓
+Module 7
+Explainable AI & Performance Evaluation
+        ↓
+Final Evaluation & Decision Reports
+```
 
 ---
 
 ## Key Objectives
 
-- Develop a modular Digital Twin architecture for industrial energy assets.
-- Acquire, generate, validate, and preprocess operational data.
-- Maintain synchronized virtual representations of physical components.
-- Forecast future energy consumption and operational behavior.
-- Detect abnormal operating conditions.
-- Generate intelligent decisions using a rule-based Multi-Agent System.
-- Optimize energy allocation using a Genetic Algorithm.
-- Provide interpretable Machine Learning predictions using SHAP.
-- Integrate all modules into a unified processing pipeline.
-- Provide a centralized dashboard for monitoring and analysis.
-- Build an extensible architecture suitable for future real-time and IoT integration.
+The primary objectives of the project are:
+
+1. Build a modular industrial Digital Twin architecture.
+2. Acquire, clean, and standardize equipment data.
+3. Maintain synchronized digital representations of industrial assets.
+4. Forecast future production and energy-related operating conditions.
+5. Generate intelligent recommendations through specialized agents.
+6. Simulate alternative operating scenarios.
+7. Rank scenarios using energy, cost, and carbon objectives.
+8. Optimize the selected operating state using Genetic Algorithm optimization.
+9. Explain forecasting decisions using SHAP and feature importance.
+10. Detect anomalous operating behavior using Isolation Forest.
+11. Monitor model performance and feature drift.
+12. Support safe candidate-model retraining.
+13. Validate contracts and outputs between all modules.
+14. Generate reproducible JSON artifacts for downstream systems.
 
 ---
 
-## System Architecture
+# System Architecture
 
-    Physical Energy System
-              │
-              ▼
-    ┌─────────────────────┐
-    │  Data Acquisition   │
-    │ Collection /        │
-    │ Simulation /        │
-    │ Preprocessing       │
-    └──────────┬──────────┘
-               │
-               ▼
-    ┌─────────────────────┐
-    │    Digital Twins    │
-    │ Production / Boiler │
-    │ Compressor / HVAC   │
-    │ Solar / Battery /   │
-    │ Grid                │
-    └──────────┬──────────┘
-               │
-               ▼
-    ┌─────────────────────┐
-    │     Forecasting     │
-    │   Random Forest     │
-    └──────────┬──────────┘
-               │
-               ▼
-    ┌─────────────────────┐
-    │ Anomaly Detection   │
-    │  Isolation Forest   │
-    └──────────┬──────────┘
-               │
-               ▼
-    ┌─────────────────────┐
-    │ Intelligent         │
-    │ Decision-Making     │
-    │ Multi-Agent System  │
-    └──────────┬──────────┘
-               │
-               ▼
-    ┌─────────────────────┐
-    │    Optimization     │
-    │ Genetic Algorithm   │
-    └──────────┬──────────┘
-               │
-               ▼
-    ┌─────────────────────┐
-    │   Explainable AI    │
-    │        SHAP         │
-    └──────────┬──────────┘
-               │
-               ▼
-    ┌─────────────────────┐
-    │      Dashboard      │
-    │ Monitoring / Alerts │
-    │ Forecasts / Results │
-    └─────────────────────┘
+The project is organized as a sequential but modular decision pipeline.
+
+```text
+                    ┌──────────────────────┐
+                    │ Module 1             │
+                    │ Data Acquisition     │
+                    └──────────┬───────────┘
+                               ↓
+                    ┌──────────────────────┐
+                    │ Module 2             │
+                    │ Digital Twin         │
+                    └──────────┬───────────┘
+                               ↓
+                    ┌──────────────────────┐
+                    │ Module 3             │
+                    │ AI Forecasting       │
+                    └──────────┬───────────┘
+                               ↓
+                    ┌──────────────────────┐
+                    │ Module 4             │
+                    │ Multi-Agent          │
+                    │ Intelligence         │
+                    └──────────┬───────────┘
+                               ↓
+                    ┌──────────────────────┐
+                    │ Module 5             │
+                    │ Scenario Simulation  │
+                    └──────────┬───────────┘
+                               ↓
+                    ┌──────────────────────┐
+                    │ Module 6             │
+                    │ Optimization Engine  │
+                    └──────────┬───────────┘
+                               ↓
+                    ┌──────────────────────┐
+                    │ Module 7             │
+                    │ Explainable AI &     │
+                    │ Performance          │
+                    │ Evaluation            │
+                    └──────────────────────┘
+```
 
 ---
 
-# Project Modules
+# Module Overview
 
-## Module 1 — Data Acquisition
-
-The Data Acquisition module acts as the primary data layer of the system.
-
-It is responsible for collecting or generating operational data and transforming it into a clean, structured format that can be consumed by the Digital Twin and AI modules.
-
-### Responsibilities
-
-- Data collection
-- Sensor-data simulation
-- Synthetic data generation
-- Data validation
-- Data cleaning
-- Missing-value handling
-- Feature preparation
-- Dataset generation
-- Data preprocessing
-
-### Typical Parameters
-
-The system can process parameters such as:
-
-- Temperature
-- Pressure
-- Voltage
-- Current
-- Power consumption
-- Load
-- Flow rate
-- Energy generation
-- Battery state
-- Environmental conditions
-
-### Data Flow
-
-    Raw / Simulated Data
-            │
-            ▼
-      Data Validation
-            │
-            ▼
-       Data Cleaning
-            │
-            ▼
-     Feature Preparation
-            │
-            ▼
-      Processed Dataset
-            │
-            ▼
-       Downstream Modules
+| Module | Name | Primary Responsibility |
+|---|---|---|
+| Module 1 | Data Acquisition | Data generation, acquisition, cleaning, and preparation |
+| Module 2 | Digital Twin | Digital representation and synchronization of industrial assets |
+| Module 3 | AI Forecasting | Forecast future industrial and energy-related states |
+| Module 4 | Multi-Agent Intelligence | Generate equipment-specific intelligent recommendations |
+| Module 5 | Generative Scenario Simulation | Generate, simulate, compare, and rank operating scenarios |
+| Module 6 | Optimization Engine | Optimize the selected scenario subject to operational constraints |
+| Module 7 | Explainable AI & Performance Evaluation | Evaluate, explain, monitor, detect anomalies, and validate the complete pipeline |
 
 ---
 
-## Module 2 — Digital Twin
+# Module 1 - Data Acquisition
 
-The Digital Twin module provides virtual representations of the physical energy assets in the system.
+Module 1 provides the data foundation for the complete Digital Twin system.
 
-Each Digital Twin maintains the operational state of its corresponding asset and provides mechanisms for state updates, synchronization, and simulation.
+Its responsibilities include:
 
-### Digital Twins
+- Data acquisition.
+- Synthetic industrial sensor generation where required.
+- Data cleaning.
+- Data validation.
+- Preparation of structured datasets for downstream modules.
+- Generation of standardized CSV artifacts.
 
-The system includes Digital Twins for:
+The cleaned data is consumed by the Digital Twin and forecasting layers.
 
-- Production Line A
-- Production Line B
-- Boiler
-- Compressor
-- HVAC
-- Solar
-- Battery
-- Electrical Grid
+Typical industrial data includes:
 
-### Responsibilities
-
-- Maintain component state
-- Update operational parameters
-- Synchronize system states
-- Simulate component behavior
-- Handle state updates
-- Provide common interfaces
-- Enable communication between components
-- Maintain consistency across the Digital Twin ecosystem
-
-### Digital Twin Workflow
-
-    Physical Asset
-          │
-          ▼
-    Sensor / Input Data
-          │
-          ▼
-    Digital Twin State
-          │
-          ▼
-    State Synchronization
-          │
-          ▼
-    Simulation / Prediction
-          │
-          ▼
-    Updated Digital State
+- Production load.
+- Motor temperature.
+- Vibration.
+- Steam pressure.
+- Feedwater temperature.
+- Flue gas temperature.
+- Compressor pressure.
+- HVAC conditions.
+- Battery voltage and current.
+- Grid parameters.
+- Solar irradiance.
+- Equipment status.
 
 ---
 
-## Module 3 — Forecasting and AI
+# Module 2 - Digital Twin
 
-The Forecasting and AI module provides the intelligence layer of the platform.
+Module 2 maintains digital representations of industrial assets and their operating states.
 
-It uses historical and processed operational data to predict future energy consumption and system behavior.
+The Digital Twin layer provides a common runtime representation for assets such as:
 
-### Primary Forecasting Model
+- Production Line A.
+- Production Line B.
+- Boiler.
+- Compressor.
+- HVAC.
+- Solar.
+- Battery.
+- Grid.
 
-The primary forecasting model used by the system is:
+The module supports:
 
-**Random Forest Regressor**
+- State management.
+- Simulation.
+- Runtime updates.
+- Asset synchronization.
+- Consistent Digital Twin interfaces.
+- Integration between individual asset twins.
 
-Random Forest is suitable for the project because it can model nonlinear relationships between multiple operational parameters while working effectively with structured/tabular datasets.
+The synchronization layer allows multiple equipment twins to operate as part of one industrial system.
 
-### Why Random Forest?
+---
 
-- Handles nonlinear relationships
-- Works effectively with tabular data
-- Supports multiple input features
-- Robust to noisy data
-- Provides feature importance
-- Relatively easy to interpret
-- Suitable for regression problems
-- Does not require extensive feature scaling
+# Module 3 - AI Forecasting
 
-### Forecasting Pipeline
+Module 3 provides machine-learning-based forecasting for industrial and energy-related variables.
 
-    Historical Data
-          │
-          ▼
-    Feature Engineering
-          │
-          ▼
-    Feature Validation
-          │
-          ▼
-    Random Forest Model
-          │
-          ▼
-    Prediction
-          │
-          ▼
-    Forecast Validation
-          │
-          ▼
-    Forecast Output
+The forecasting architecture uses **Random Forest Regression** models for the supported forecasting targets.
+
+The current configuration includes forecasting models for:
+
+- Production.
+- Boiler.
+- Compressor.
+- HVAC.
+- Battery.
+- Grid.
+- Solar.
+
+Representative targets include:
+
+```text
+Production:
+units_per_hour
+
+Boiler:
+fuel_flow_m3_hr
+
+Compressor:
+power_kw
+
+HVAC:
+power_kw
+
+Battery:
+battery_power_kw
+
+Grid:
+grid_import_kw
+
+Solar:
+inverter_power_kw
+```
+
+## Forecasting Pipeline
+
+```text
+Current Digital Twin State
+          ↓
+Feature Preprocessing
+          ↓
+Categorical Encoding
+          ↓
+Random Forest Model
+          ↓
+Future State Forecast
+          ↓
+Energy Forecast
+          ↓
+forecast_output.json
+```
+
+The Module 3 integration output currently follows the structure:
+
+```json
+{
+    "future_state": {
+        "units_per_hour": 74.07,
+        "fuel_flow_m3_hr": 144.21,
+        "compressor_power_kw": 60.84,
+        "hvac_power_kw": 7.86,
+        "battery_power_kw": 24.93,
+        "grid_import_kw": 387.73,
+        "inverter_power_kw": 260.88
+    },
+    "energy_forecast": {
+        "total_load_kw": 68.7,
+        "renewable_generation_kw": 285.81,
+        "grid_import_kw": 387.73,
+        "boiler_fuel_flow_m3_hr": 144.21
+    }
+}
+```
+
+---
+
+# Module 4 - Multi-Agent Intelligence
+
+Module 4 converts forecasts and Digital Twin information into intelligent equipment-level recommendations.
+
+The system uses specialized agents for different industrial assets.
+
+Examples include:
+
+- Production agent.
+- Boiler agent.
+- Compressor agent.
+- HVAC agent.
+- Battery management agent.
+- Grid agent.
+- Renewable/solar-related decision logic.
+
+The agents analyze operating conditions and produce structured recommendations containing information such as:
+
+- Agent.
+- Equipment.
+- Action.
+- Priority.
+- Reason.
+- Setpoints.
+- Expected impact.
+- Constraints.
+
+The Module 4 output is consumed by Module 5 for scenario generation.
+
+---
+
+# Module 5 - Generative Scenario Simulation
+
+Module 5 generates and evaluates alternative operating scenarios using Module 3 forecasts and Module 4 recommendations.
+
+The scenario layer considers operational objectives such as:
+
+- Energy utilization.
+- Operating cost.
+- Carbon emissions.
+
+The scenarios are ranked using configurable weights.
+
+Current ranking weights are:
+
+```text
+Energy : 0.35
+Cost   : 0.35
+Carbon : 0.30
+```
+
+The scenario simulation pipeline is:
+
+```text
+Module 3 Forecast
+        +
+Module 4 Recommendations
+        ↓
+Scenario Generation
+        ↓
+Scenario Simulation
+        ↓
+Scenario Evaluation
+        ↓
+Scenario Ranking
+        ↓
+Best Scenario
+```
+
+The current integrated pipeline evaluates:
+
+```text
+Scenario count : 5
+Best scenario  : cost_saver
+Best score     : 100.0
+```
+
+The selected scenario combines intelligent agent recommendations with flexible electrical load reduction and renewable-energy utilization.
+
+---
+
+# Module 6 - Optimization Engine
+
+Module 6 receives the selected scenario from Module 5 and performs constrained operating-state optimization.
+
+The optimization engine uses a **real-valued Genetic Algorithm**.
+
+## Optimization Variables
+
+The optimized state includes variables such as:
+
+- Production load.
+- Compressor power.
+- HVAC power.
+- Battery charge.
+- Battery discharge.
+- Grid export limit.
+- Boiler fuel flow.
+- Renewable generation.
+- Projected battery state of charge.
+
+## Optimization Objectives
+
+The optimization combines:
+
+- Energy performance.
+- Operating cost.
+- Carbon performance.
+
+The optimization is subject to operational constraints such as:
+
+- Equipment limits.
+- Battery state-of-charge limits.
+- Charge/discharge limits.
+- Grid import/export limits.
+- Compressor power limits.
+- HVAC power limits.
+- Boiler fuel-flow limits.
+
+## Current Optimization Configuration
+
+```text
+Algorithm       : real_valued_genetic_algorithm
+Generations     : 80
+Population size : 60
+Evaluations     : 4800
+Seed            : 42
+```
+
+## Current Optimized State
+
+```json
+{
+    "production_load_kw": 68.7,
+    "compressor_power_kw": 51.71,
+    "hvac_power_kw": 7.86,
+    "battery_charge_kw": 32.61,
+    "battery_discharge_kw": 0.0,
+    "grid_export_limit_kw": 100.0,
+    "boiler_fuel_m3_hr": 122.58,
+    "renewable_generation_kw": 260.88,
+    "projected_soc_percent": 80.979
+}
+```
+
+The current optimization result is feasible.
+
+```text
+Optimization feasible : True
+Best fitness           : 0.9974476
+```
+
+The optimization produced a battery charging recommendation:
+
+```text
+Current battery charge : 40.00 kW
+Optimized charge       : 32.61 kW
+Change                 : -18.48%
+```
+
+---
+
+# Module 7 - Explainable AI & Performance Evaluation
+
+Module 7 is the final evaluation, explainability, anomaly detection, model monitoring, retraining, and integration layer.
+
+It consumes artifacts from Modules 3–6 and validates the complete decision pipeline.
+
+Its major responsibilities are:
+
+- Forecast evaluation.
+- Baseline versus optimized benchmarking.
+- SHAP-based explanation.
+- Global feature importance.
+- Anomaly detection.
+- Model performance monitoring.
+- Feature drift detection.
+- Safe candidate-model retraining.
+- Final integration validation.
+
+## Module 7 Architecture
+
+```text
+Module 7 - Explainable AI & Performance Evaluation
+
+├── evaluation/
+│   ├── benchmark.py
+│   ├── evaluation_validator.py
+│   ├── metrics.py
+│   ├── performance_evaluator.py
+│   └── __init__.py
+│
+├── explainability/
+│   ├── explanation_generator.py
+│   ├── feature_importance.py
+│   ├── shap_analyzer.py
+│   └── __init__.py
+│
+├── anomaly_detection/
+│   ├── anomaly_detector.py
+│   ├── anomaly_validator.py
+│   ├── isolation_forest.py
+│   └── __init__.py
+│
+├── retraining/
+│   ├── model_monitor.py
+│   ├── retraining_pipeline.py
+│   ├── retraining_validator.py
+│   └── __init__.py
+│
+├── integration/
+│   ├── final_controller.py
+│   ├── integration_test.py
+│   ├── integration_validator.py
+│   └── __init__.py
+│
+└── outputs/
+    ├── performance/
+    ├── explanations/
+    ├── anomalies/
+    └── reports/
+```
+
+---
+
+## Forecast Performance Evaluation
+
+Module 7 provides robust regression metrics including:
+
+- MAE.
+- MSE.
+- RMSE.
+- MAPE.
+- SMAPE.
+- WAPE.
+- R².
+- Bias.
+- Maximum Error.
+
+The evaluation layer validates:
+
+- Non-empty actual and predicted values.
+- Matching shapes.
+- Finite numerical values.
+- Valid metric outputs.
+
+---
+
+## Optimization Benchmarking
+
+Module 7 compares Module 6 baseline and optimized operating states.
+
+The benchmark evaluates:
+
+### Energy
+
+- Energy objective.
+- Site consumption.
+- Grid import.
+- Grid export.
+- Curtailed energy.
+
+### Cost
+
+- Net operating cost.
+
+### Carbon
+
+- Total CO₂e emissions.
+
+Each metric is categorized as:
+
+```text
+improved
+regressed
+unchanged
+```
+
+The current integrated benchmark result is:
+
+```text
+Improved  : 3
+Regressed : 0
+Unchanged : 4
+```
+
+---
+
+## Explainable AI
+
+The explainability package provides local and global model interpretation.
+
+### SHAP Analysis
+
+The implementation uses exact single-reference Shapley-value calculation for small forecasting models.
+
+The process is:
+
+```text
+Background Data
+      ↓
+Reference Point
+      ↓
+Feature Coalitions
+      ↓
+Model Predictions
+      ↓
+Shapley Contributions
+      ↓
+Additivity Verification
+```
+
+The generated explanations contain:
+
+- Base value.
+- Prediction.
+- Feature value.
+- SHAP value.
+- Feature effect.
+- Contribution sum.
+- Additivity error.
+
+### Global Feature Importance
+
+Two approaches are supported:
+
+1. Model-native feature importance.
+2. Permutation-based RMSE importance.
+
+Permutation importance measures the change in model error after randomly shuffling individual features.
 
 ---
 
 ## Anomaly Detection
 
-The system uses **Isolation Forest** for identifying unusual operating conditions.
+Module 7 uses **Isolation Forest** for structured industrial anomaly detection.
 
-Isolation Forest is an unsupervised anomaly-detection technique that can identify observations that differ significantly from normal operating patterns.
+The anomaly detector:
 
-### Potential Anomalies
+- Learns normal operating patterns.
+- Scores new observations.
+- Classifies observations as normal or anomalous.
+- Produces normalized anomaly scores.
 
-- Unusual energy consumption
-- Temperature deviations
-- Pressure deviations
-- Unexpected load
-- Abnormal sensor values
-- Equipment behavior deviations
+Output fields include:
 
-### Workflow
+```text
+row_index
+raw_score
+anomaly_score
+label
+is_anomaly
+values
+```
 
-    Operational Data
-          │
-          ▼
-    Isolation Forest
-          │
-          ▼
-    ┌───────────────┐
-    │ Normal /      │
-    │ Anomalous     │
-    └───────┬───────┘
-            │
-            ▼
-    Decision Layer
+Valid labels are:
 
----
+```text
+normal
+anomaly
+```
 
-## Intelligent Decision-Making
+The anomaly validator checks:
 
-The project uses a **Rule-Based Multi-Agent System** to convert system conditions and AI outputs into operational decisions.
-
-The decision layer considers information such as:
-
-- Current system state
-- Forecasted demand
-- Energy availability
-- Renewable generation
-- Battery state
-- Equipment status
-- Detected anomalies
-- Operational constraints
-
-### Decision Architecture
-
-    ┌─────────────────────┐
-    │   Decision Engine   │
-    └──────────┬──────────┘
-               │
-       ┌───────┼────────┐
-       │       │        │
-       ▼       ▼        ▼
-    Load    Energy   Storage
-    Agent    Agent     Agent
-       │       │        │
-       └───────┼────────┘
-               │
-               ▼
-        Final Decision
-
-The multi-agent approach allows different decision responsibilities to remain modular while contributing to a common system-level decision.
+- Record count.
+- Anomaly count.
+- Labels.
+- Score range.
+- Consistency between labels and anomaly count.
 
 ---
 
-# Optimization
+## Model Monitoring
 
-The optimization layer uses a **Genetic Algorithm (GA)** to identify an efficient energy allocation strategy.
+The monitoring layer checks whether a forecasting model's performance has degraded.
 
-The optimization process can account for:
+It monitors:
 
-- Energy demand
-- Available generation
-- Battery capacity
-- Equipment constraints
-- Renewable energy availability
-- Load requirements
-- Operational constraints
+- MAE.
+- RMSE.
+- R².
 
-### Genetic Algorithm Workflow
+It also checks numerical feature drift.
 
-    Initial Population
-            │
-            ▼
-    Fitness Evaluation
-            │
-            ▼
-        Selection
-            │
-            ▼
-        Crossover
-            │
-            ▼
-         Mutation
-            │
-            ▼
-     New Population
-            │
-            ▼
-    Fitness Evaluation
-            │
-            ▼
-    Optimal / Near-Optimal
-          Solution
+Default thresholds include:
 
-The optimizer is intended to improve energy utilization while satisfying the constraints of the overall system.
+```text
+Error degradation threshold : 20%
+R² drop threshold           : 0.10
+Minimum acceptable R²       : 0.50
+Feature drift threshold     : 0.75
+```
+
+The monitor returns:
+
+```text
+healthy
+```
+
+or:
+
+```text
+degraded
+```
+
+and determines whether retraining is required.
 
 ---
 
-# Explainable AI
+## Feature Drift Detection
 
-The project incorporates **SHAP (SHapley Additive exPlanations)** to improve the interpretability of Machine Learning predictions.
+Feature drift is evaluated using standardized mean shift.
 
-SHAP helps identify how individual input features contribute to a model's prediction.
+Conceptually:
 
-### Example
+```text
+standardized_mean_shift =
+    |current_mean - reference_mean|
+    --------------------------------
+       reference_standard_deviation
+```
 
-    Model Prediction
-           │
-           ▼
-      SHAP Analysis
-           │
-     ┌─────┼─────┐
-     │     │     │
-     ▼     ▼     ▼
-    Load  Temp  Pressure
-     │     │     │
-     └─────┼─────┘
-           │
-           ▼
-    Prediction Explanation
-
-This provides greater transparency and helps users understand the factors influencing AI-generated predictions.
+A feature is considered drifted when the configured threshold is exceeded.
 
 ---
 
-# Module 4 — Integration
+## Safe Model Retraining
 
-The Integration module connects all individual project components into a unified system.
+The retraining pipeline follows a controlled candidate-model workflow.
 
-It is responsible for ensuring that data and outputs move correctly between the different modules.
+```text
+Current Model
+     ↓
+Evaluate Current Performance
+     ↓
+Train Candidate
+     ↓
+Evaluate Candidate
+     ↓
+Compare RMSE
+     ↓
+Accept / Reject
+     ↓
+Optional Promotion
+```
 
-### Integrated Pipeline
+The existing model is not overwritten by default.
 
-    Data Acquisition
-           │
-           ▼
-      Digital Twin
-           │
-           ▼
-      Forecasting
-           │
-           ▼
-   Anomaly Detection
-           │
-           ▼
-   Decision Agents
-           │
-           ▼
-      Optimization
-           │
-           ▼
-    Explainability
-           │
-           ▼
-       Dashboard
-
-### Integration Responsibilities
-
-- Connect project modules
-- Maintain compatible interfaces
-- Validate module outputs
-- Coordinate data flow
-- Coordinate system execution
-- Perform integration testing
-- Support end-to-end execution
+This prevents an inferior candidate from automatically replacing a working model.
 
 ---
 
-# Dashboard
+# End-to-End Data Flow
 
-The project includes a centralized dashboard for visualizing the state and performance of the Digital Twin ecosystem.
+The complete project follows this data flow:
 
-### Dashboard Capabilities
+```text
+Raw / Synthetic Industrial Data
+            ↓
+Module 1
+Data Cleaning & Preparation
+            ↓
+Module 2
+Digital Twin State
+            ↓
+Module 3
+Random Forest Forecasting
+            ↓
+forecast_output.json
+            ↓
+Module 4
+Multi-Agent Recommendations
+            ↓
+recommendations.json
+            ↓
+Module 5
+Scenario Generation & Ranking
+            ↓
+best_scenario.json
+            ↓
+Module 6
+Genetic Algorithm Optimization
+            ↓
+optimized_state.json
+optimization_report.json
+            ↓
+Module 7
+Evaluation + Explainability +
+Anomaly Detection + Monitoring
+            ↓
+Final Integration Reports
+```
 
-- System overview
-- Energy consumption monitoring
-- Digital Twin status
-- Component-level monitoring
-- Forecast visualization
-- Anomaly alerts
-- Optimization results
-- AI insights
-- Historical trends
-- Performance metrics
+---
 
-The dashboard acts as the primary visualization layer for presenting system state, predictions, alerts, and optimization results.
+# Integration and Validation
+
+Each module uses structured contracts and validation mechanisms to ensure reliable communication between stages.
+
+The final integration test validates:
+
+- Module 3 forecast contract.
+- Module 4 recommendation contract.
+- Module 5 scenario contract.
+- Module 6 optimization contract.
+- Module 6 optimized-state contract.
+- Module 7 performance output.
+- Module 7 monitoring output.
+- Module 7 explainability status.
+- Module 7 anomaly status.
+
+The final integration test executes seven stages:
+
+```text
+[1/7] Initialize Module 7
+        ↓
+[2/7] Check Modules 3–6 outputs
+        ↓
+[3/7] Load Modules 3–6 artifacts
+        ↓
+[4/7] Validate upstream contracts
+        ↓
+[5/7] Execute final Module 7 controller
+        ↓
+[6/7] Validate Module 7 outputs
+        ↓
+[7/7] Generate final integration summary
+```
+
+---
+
+# Current End-to-End Results
+
+The complete Module 3 → Module 7 pipeline currently passes its final integration test.
+
+```text
+Module 3 → Forecasting       : PASS
+Module 4 → Multi-Agent       : PASS
+Module 5 → Scenario          : PASS
+Module 6 → Optimization      : PASS
+Module 7 → Evaluation        : PASS
+```
+
+Current integrated results:
+
+```text
+Recommendations              : 14
+Scenarios evaluated          : 5
+Best scenario                : cost_saver
+Best scenario score          : 100.0
+Optimization feasible        : True
+Benchmark improved           : 3
+Benchmark regressed          : 0
+Benchmark unchanged          : 4
+```
+
+The final integration test concludes with:
+
+```text
+✓ MODULE 7 END-TO-END INTEGRATION TEST PASSED
+```
+
+---
+
+# Optional Runtime Components
+
+The architecture supports:
+
+- Model monitoring.
+- Explainability.
+- Anomaly detection.
+
+The final integration layer intentionally does not fabricate results when the required runtime inputs are unavailable.
+
+For example, meaningful SHAP analysis requires:
+
+- A trained forecasting model.
+- Feature data.
+- Background samples.
+- Samples to explain.
+
+Meaningful anomaly detection requires:
+
+- A structured feature matrix.
+- Appropriate operating records.
+- A fitted Isolation Forest model.
+
+Meaningful performance evaluation requires actual-versus-predicted observations.
+
+Therefore, unavailable evaluation inputs are represented through explicit status outputs rather than fabricated numerical results.
 
 ---
 
 # Project Structure
 
-    DigitalTwin/
-    │
-    ├── data_acquisition/
-    │   ├── data/
-    │   ├── preprocessing/
-    │   ├── simulation/
-    │   ├── sensors/
-    │   └── ...
-    │
-    ├── digital_twin/
-    │   ├── common/
-    │   ├── production/
-    │   ├── boiler/
-    │   ├── compressor/
-    │   ├── hvac/
-    │   ├── solar/
-    │   ├── battery/
-    │   ├── grid/
-    │   └── integration/
-    │
-    ├── forecasting/
-    │   ├── common/
-    │   │   ├── config.py
-    │   │   ├── feature_builder.py
-    │   │   ├── forecasting_base.py
-    │   │   ├── metrics.py
-    │   │   ├── model_manager.py
-    │   │   └── utils.py
-    │   │
-    │   ├── infrastructure/
-    │   │   ├── boiler_forecast.py
-    │   │   ├── compressor_forecast.py
-    │   │   ├── hvac_forecast.py
-    │   │   └── maintenance_predictor.py
-    │   │
-    │   ├── models/
-    │   │   └── production_rf.joblib
-    │   │
-    │   ├── production/
-    │   │   ├── production_forecast.py
-    │   │   └── scenario_generator.py
-    │   │
-    │   ├── training/
-    │   │   └── train_production.py
-    │   │
-    │   ├── outputs/
-    │   │   ├── predictions/
-    │   │   └── reports/
-    │   │
-    │   └── integration/
-    │       ├── ai_pipeline.py
-    │       ├── forecast_validator.py
-    │       └── integration_test.py
-    │
-    ├── integration/
-    │   ├── pipelines/
-    │   ├── validators/
-    │   ├── tests/
-    │   └── ...
-    │
-    ├── frontend/
-    │   └── ...
-    │
-    ├── requirements.txt
-    ├── README.md
-    └── ...
+A high-level project structure is:
+
+```text
+DigitalTwin-AI/
+│
+├── Module 1 - Data Acquisition/
+│
+├── Module 2 - Digital Twin/
+│
+├── Module 3 - Forecasting/
+│   ├── common/
+│   ├── infrastructure/
+│   ├── integration/
+│   ├── models/
+│   ├── outputs/
+│   ├── production/
+│   ├── renewable/
+│   └── training/
+│
+├── Module 4 - Multi-Agent Intelligence/
+│   ├── agents/
+│   ├── common/
+│   ├── integration/
+│   ├── recommendation/
+│   └── outputs/
+│
+├── Module 5 - Scenario Simulation/
+│   ├── scenario_generation/
+│   ├── simulation/
+│   ├── ranking/
+│   ├── integration/
+│   └── outputs/
+│
+├── Module 6 - Optimization Engine/
+│   ├── optimization/
+│   ├── recommendation/
+│   ├── integration/
+│   └── outputs/
+│
+├── Module 7 - Explainable AI & Performance Evaluation/
+│   ├── evaluation/
+│   ├── explainability/
+│   ├── anomaly_detection/
+│   ├── retraining/
+│   ├── integration/
+│   ├── tests/
+│   └── outputs/
+│
+└── README.md
+```
 
 ---
 
 # Technology Stack
 
-## Programming Languages
+The project uses a Python-based AI and Digital Twin stack.
 
-- Python
-- JavaScript
-- TypeScript
+### Programming
 
-## Machine Learning
+- Python 3.x
 
-- Scikit-learn
-- Random Forest Regressor
-- Isolation Forest
-- SHAP
-- Joblib
+### Machine Learning
 
-## Data Processing
+- Scikit-learn.
+- Random Forest Regression.
+- Isolation Forest.
 
-- Pandas
-- NumPy
+### Data Processing
 
-## Digital Twin
+- NumPy.
+- Pandas.
 
-- Python
-- State Management
-- State Synchronization
-- Simulation Components
-- Modular Architecture
+### Model Persistence
 
-## Optimization
+- Joblib.
 
-- Genetic Algorithm
+### Optimization
 
-## Frontend
+- Real-valued Genetic Algorithm.
 
-- React
-- Next.js
-- TypeScript
-- JavaScript
-- Tailwind CSS
+### Explainable AI
 
-## Development Tools
+- Exact Shapley-value calculation.
+- Native feature importance.
+- Permutation feature importance.
 
-- Git
-- GitHub
-- Visual Studio Code
-- Python Virtual Environment
+### Data Exchange
+
+- JSON.
+- CSV.
+
+### Validation
+
+- Modular Python validators.
+- End-to-end integration tests.
 
 ---
 
-# Installation
+# Running the Project
 
-## Prerequisites
-
-Ensure the following are installed before setting up the project:
-
-- Python 3.10 or higher
-- Node.js
-- npm
-- Git
-
-## Clone the Repository
+## 1. Clone the Repository
 
 ```bash
 git clone <repository-url>
-cd DigitalTwin
+cd DigitalTwin-AI
+```
 
+## 2. Install Dependencies
+
+Install the required Python dependencies for the relevant module.
+
+For Module 7:
+
+```powershell
+cd "Module 7 - Explainable AI & Performance Evaluation"
+pip install -r requirements.txt
+```
+
+## 3. Run the Module 7 End-to-End Test
+
+From the Module 7 directory:
+
+```powershell
+py -m integration.integration_test
+```
+
+A successful execution should end with:
+
+```text
+✓ MODULE 7 END-TO-END INTEGRATION TEST PASSED
+```
+
+---
+
+# Running Individual Modules
+
+Each module is independently structured and can be executed using its own scripts and integration entry points.
+
+The recommended execution order is:
+
+```text
+Module 1
+    ↓
+Module 2
+    ↓
+Module 3
+    ↓
+Module 4
+    ↓
+Module 5
+    ↓
+Module 6
+    ↓
+Module 7
+```
+
+The final Module 7 integration test expects the upstream JSON artifacts from Modules 3–6 to exist in their respective output directories.
+
+---
+
+# Generated Outputs
+
+The project generates structured artifacts throughout the pipeline.
+
+Representative outputs include:
+
+```text
+Module 3 - Forecasting/
+└── outputs/
+    └── forecast_output.json
+
+Module 4 - Multi-Agent Intelligence/
+└── outputs/
+    └── recommendations/
+        └── recommendations.json
+
+Module 5 - Scenario Simulation/
+└── outputs/
+    ├── best_scenario/
+    │   └── best_scenario.json
+    └── comparisons/
+        └── scenario_comparison.json
+
+Module 6 - Optimization Engine/
+└── outputs/
+    ├── optimized_states/
+    │   └── optimized_state.json
+    └── reports/
+        └── optimization_report.json
+
+Module 7 - Explainable AI & Performance Evaluation/
+└── outputs/
+    ├── performance/
+    │   ├── final_performance.json
+    │   ├── model_monitoring.json
+    │   ├── performance_report.json
+    │   └── retraining_report.json
+    │
+    ├── explanations/
+    │   ├── feature_importance.json
+    │   ├── shap_explanations.json
+    │   └── explainability_status.json
+    │
+    ├── anomalies/
+    │   ├── anomaly_report.json
+    │   └── anomaly_status.json
+    │
+    └── reports/
+        └── final_integration_report.json
+```
+
+---
+
+# Design Principles
+
+## Modular Architecture
+
+Each major responsibility is implemented as an independent module or package.
+
+This allows individual components to be developed, tested, replaced, and integrated independently.
+
+## Contract-Based Integration
+
+Modules exchange structured artifacts with explicit validation.
+
+This reduces the possibility of silent interface mismatches.
+
+## Validation First
+
+Inputs and outputs are validated before being consumed by downstream components.
+
+## No Fabricated Evaluation
+
+The system does not claim model performance, explainability, or anomaly results when the required evidence is unavailable.
+
+## Safe Optimization
+
+Optimization respects configured operating constraints and generates a feasible operating state.
+
+## Safe Retraining
+
+Candidate models are evaluated before optional promotion.
+
+## Explainability
+
+The project provides both local and global mechanisms for understanding model behavior.
+
+## Reproducibility
+
+Randomized components use controlled random seeds where applicable.
+
+## JSON-Based Integration
+
+Structured JSON artifacts provide a clear interface between modules and make the system suitable for future dashboard or API integration.
+
+---
+
+# Future Scope
+
+The architecture can be extended with:
+
+- Real-time industrial sensor ingestion.
+- Live Digital Twin synchronization.
+- Online forecasting.
+- Real-time anomaly alerts.
+- Automated model retraining triggers.
+- Real-time optimization.
+- Dashboard integration.
+- REST API integration.
+- Streaming data pipelines.
+- More advanced forecasting models.
+- Multi-objective optimization.
+- Advanced uncertainty estimation.
+- Real-time explainability.
+- Historical trend visualization.
+- Role-based monitoring and control.
+
+---
+
+# Final System Summary
+
+The Digital Twin project integrates the complete intelligent energy-management lifecycle:
+
+```text
+DATA
+  ↓
+DIGITAL TWIN
+  ↓
+FORECAST
+  ↓
+INTELLIGENT DECISION
+  ↓
+SCENARIO GENERATION
+  ↓
+OPTIMIZATION
+  ↓
+EXPLAINABILITY
+  ↓
+ANOMALY DETECTION
+  ↓
+PERFORMANCE EVALUATION
+```
+
+The architecture provides a foundation for an industrial AI system capable of moving from raw operational data to forecast-driven decisions and optimized operating states while maintaining validation, explainability, and performance-analysis capabilities.
+
+---
+
+# Authors
+**Kopal Sachan**  
+**Aryan Pundir**  
+**Udit Mittal**
+
+---
+
+> **Project:** Generative Digital Twin for Real-Time Energy Management and Autonomous Load Optimization
+>
+> **Pipeline:** Module 1 → Module 2 → Module 3 → Module 4 → Module 5 → Module 6 → Module 7
